@@ -14,6 +14,10 @@ func ConvertResponseCode(err error) int {
 		return http.StatusBadRequest
 	case errors.Is(err, constant.ErrDuplicatedData):
 		return http.StatusBadRequest
+	case errors.Is(err, constant.ErrNotFound):
+		return http.StatusNotFound
+	case errors.Is(err, constant.ErrInvalidEmailOrPassword):
+		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
 	}

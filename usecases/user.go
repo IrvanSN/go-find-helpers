@@ -31,9 +31,26 @@ func (u *UserUseCase) SignUp(user *entities.User) (entities.User, error) {
 	}
 	user.Auth.PasswordHash = string(hashedPassword)
 
-	err := u.repository.SignUp(user)
-	if err != nil {
+	if err := u.repository.SignUp(user); err != nil {
 		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) SignIn(user *entities.User) (entities.User, error) {
+	if user.Auth.Email == "" || user.Auth.PasswordHash == "" || user.Role == "" {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	password := user.Auth.PasswordHash
+
+	if err := u.repository.SignIn(user); err != nil {
+		return entities.User{}, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Auth.PasswordHash), []byte(password)); err != nil {
+		return entities.User{}, constant.ErrInvalidEmailOrPassword
 	}
 
 	return *user, nil

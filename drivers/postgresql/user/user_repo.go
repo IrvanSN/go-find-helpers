@@ -28,3 +28,16 @@ func (r *Repo) SignUp(user *entities.User) error {
 	user = userDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) SignIn(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	if err := r.DB.Joins("Auth").First(&userDb, "\"Auth\".email = ? AND users.role = ?", userDb.Auth.Email, userDb.Role).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
