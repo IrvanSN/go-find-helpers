@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"golang.org/x/crypto/bcrypt"
@@ -21,6 +22,9 @@ func (u *UserUseCase) SignUp(user *entities.User) (entities.User, error) {
 		return entities.User{}, constant.ErrEmptyInput
 	}
 
+	user.ID = uuid.New()
+	user.Auth.ID = uuid.New()
+
 	hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(user.Auth.PasswordHash), bcrypt.DefaultCost)
 	if errHash != nil {
 		return entities.User{}, constant.ErrInvalidRequest
@@ -29,8 +33,8 @@ func (u *UserUseCase) SignUp(user *entities.User) (entities.User, error) {
 
 	err := u.repository.SignUp(user)
 	if err != nil {
-		return entities.User{}, constant.ErrInsertDatabase
+		return entities.User{}, err
 	}
 
-	return entities.User{}, nil
+	return *user, nil
 }

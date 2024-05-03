@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/irvansn/go-find-helpers/config"
 	controllers "github.com/irvansn/go-find-helpers/controllers/user"
-	"github.com/irvansn/go-find-helpers/drivers/mysql"
-	"github.com/irvansn/go-find-helpers/drivers/mysql/user"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/routes"
 	"github.com/irvansn/go-find-helpers/usecases"
 	"github.com/labstack/echo/v4"
@@ -13,7 +13,7 @@ import (
 func main() {
 	config.LoadEnv()
 	config.InitConfigMySQL()
-	db := mysql.ConnectDB(config.InitConfigMySQL())
+	db := postgresql.ConnectDB(config.InitConfigMySQL())
 
 	e := echo.New()
 

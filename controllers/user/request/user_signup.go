@@ -8,6 +8,7 @@ type UserSignUp struct {
 	PhoneNumber string `json:"phone_number"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
+	Role        string `json:"role"`
 }
 
 func (r *UserSignUp) ToEntities() *entities.User {
@@ -19,5 +20,6 @@ func (r *UserSignUp) ToEntities() *entities.User {
 			Email:        r.Email,
 			PasswordHash: r.Password,
 		},
+		Role: r.Role,
 	}
 }
