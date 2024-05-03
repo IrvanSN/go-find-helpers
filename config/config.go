@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/irvansn/go-find-helpers/drivers/mysql"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -14,8 +14,8 @@ func LoadEnv() {
 	}
 }
 
-func InitConfigMySQL() mysql.Config {
-	return mysql.Config{
+func InitConfigMySQL() postgresql.Config {
+	return postgresql.Config{
 		DBName: os.Getenv("DBName"),
 		DBUser: os.Getenv("DBUser"),
 		DBPass: os.Getenv("DBPass"),

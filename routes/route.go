@@ -10,5 +10,5 @@ type RouteController struct {
 }
 
 func (r *RouteController) InitRoute(e *echo.Echo) {
-	e.POST("/signup", r.UserController.SignUp)
+	e.POST("/v1/signup", r.UserController.SignUp)
 }

@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/google/uuid"
-	"github.com/irvansn/go-find-helpers/drivers/mysql/auth"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
 	"github.com/irvansn/go-find-helpers/entities"
 	"time"
 )
@@ -29,8 +29,13 @@ func FromUseCase(user *entities.User) *User {
 		CurrentBalance: user.CurrentBalance,
 		CurrentRating:  user.CurrentRating,
 		Role:           user.Role,
-		CreatedAt:      user.CreatedAt,
-		UpdatedAt:      user.UpdatedAt,
+		Auth: auth.Auth{
+			ID:           user.Auth.ID,
+			Email:        user.Auth.Email,
+			PasswordHash: user.Auth.PasswordHash,
+		},
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
 
@@ -43,7 +48,12 @@ func (user *User) ToUseCase() *entities.User {
 		CurrentBalance: user.CurrentBalance,
 		CurrentRating:  user.CurrentRating,
 		Role:           user.Role,
-		CreatedAt:      user.CreatedAt,
-		UpdatedAt:      user.UpdatedAt,
+		Auth: entities.Auth{
+			ID:           user.Auth.ID,
+			Email:        user.Auth.Email,
+			PasswordHash: user.Auth.PasswordHash,
+		},
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
