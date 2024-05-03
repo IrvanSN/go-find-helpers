@@ -20,8 +20,10 @@ type User struct {
 
 type RepositoryInterface interface {
 	SignUp(user *User) error
+	SignIn(user *User) error
 }
 
 type UseCaseInterface interface {
 	SignUp(user *User) (User, error)
+	SignIn(user *User) (User, error)
 }

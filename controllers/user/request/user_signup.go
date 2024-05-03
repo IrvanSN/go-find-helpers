@@ -11,7 +11,7 @@ type UserSignUp struct {
 	Role        string `json:"role"`
 }
 
-func (r *UserSignUp) ToEntities() *entities.User {
+func (r *UserSignUp) SignUpToEntities() *entities.User {
 	return &entities.User{
 		FirstName:   r.FirstName,
 		LastName:    r.LastName,
