@@ -1,7 +1,8 @@
 package user
 
 import (
-	"github.com/google/uuid"
+	"errors"
+	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
 )
@@ -16,9 +17,11 @@ func NewUserRepo(db *gorm.DB) *Repo {
 
 func (r *Repo) SignUp(user *entities.User) error {
 	userDb := FromUseCase(user)
-	userDb.ID = uuid.New()
 
 	if err := r.DB.Create(&userDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return constant.ErrDuplicatedData
+		}
 		return err
 	}
 

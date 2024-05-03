@@ -12,6 +12,8 @@ func ConvertResponseCode(err error) int {
 		return http.StatusInternalServerError
 	case errors.Is(err, constant.ErrEmptyInput):
 		return http.StatusBadRequest
+	case errors.Is(err, constant.ErrDuplicatedData):
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
