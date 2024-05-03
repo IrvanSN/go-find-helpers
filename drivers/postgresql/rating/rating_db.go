@@ -6,9 +6,9 @@ import (
 )
 
 type Rating struct {
-	ID        uuid.UUID `gorm:"type:varchar(100);" json:"id"`
-	UserID    uuid.UUID `gorm:"type:varchar(100);" json:"user_id"`
-	Star      int       `gorm:"type:int;" json:"star"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	ID        uuid.UUID `gorm:"type:varchar(100);"`
+	UserID    uuid.UUID `gorm:"type:varchar(100);"`
+	Star      int       `gorm:"type:int;"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }

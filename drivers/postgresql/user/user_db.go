@@ -12,16 +12,16 @@ import (
 )
 
 type User struct {
-	ID             uuid.UUID `gorm:"type:varchar(100);" json:"id"`
-	FirstName      string    `gorm:"type:varchar(100);not null" json:"first_name"`
-	LastName       string    `gorm:"type:varchar(100);not null" json:"last_name"`
-	PhoneNumber    string    `gorm:"type:varchar(20);not null" json:"phone_number"`
-	CurrentRating  float32   `gorm:"type:decimal;not null" json:"current_rating"`
-	CurrentBalance float64   `gorm:"type:decimal;not null" json:"current_balance"`
+	ID             uuid.UUID `gorm:"type:varchar(100);"`
+	FirstName      string    `gorm:"type:varchar(100);not null"`
+	LastName       string    `gorm:"type:varchar(100);not null"`
+	PhoneNumber    string    `gorm:"type:varchar(20);not null"`
+	CurrentRating  float32   `gorm:"type:decimal;not null"`
+	CurrentBalance float64   `gorm:"type:decimal;not null"`
 	Auth           auth.Auth
-	Role           string    `gorm:"type:varchar(100);not null" json:"role"`
-	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Role           string    `gorm:"type:varchar(100);not null"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Jobs           []job.Job
 	Rewards        []reward.Reward
 	Ratings        []rating.Rating

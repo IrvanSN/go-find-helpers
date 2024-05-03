@@ -10,21 +10,21 @@ import (
 )
 
 type Job struct {
-	ID             uuid.UUID `gorm:"type:varchar(100);" json:"id"`
-	Title          string    `gorm:"type:varchar(255);not null" json:"title"`
-	Description    string    `gorm:"type:text;not null" json:"description"`
-	Reward         float64   `gorm:"type:decimal;not null" json:"reward"`
-	FromAddressID  uuid.UUID `gorm:"type:varchar(100)" json:"from_address_id"`
+	ID             uuid.UUID `gorm:"type:varchar(100);"`
+	Title          string    `gorm:"type:varchar(255);not null"`
+	Description    string    `gorm:"type:text;not null"`
+	Reward         float64   `gorm:"type:decimal;not null"`
+	FromAddressID  uuid.UUID `gorm:"type:varchar(100)"`
 	FromAddress    address.Address
-	ToAddressID    uuid.UUID `gorm:"type:varchar(100)" json:"to_address_id"`
+	ToAddressID    uuid.UUID `gorm:"type:varchar(100)"`
 	ToAddress      address.Address
-	Status         string    `gorm:"type:varchar(50);not null" json:"status"`
-	HelperRequired uint      `gorm:"not null" json:"helper_required"`
-	CategoryID     uuid.UUID `gorm:"type:varchar(100);not null" json:"category_id"`
+	Status         string    `gorm:"type:varchar(50);not null"`
+	HelperRequired uint      `gorm:"not null"`
+	CategoryID     uuid.UUID `gorm:"type:varchar(100);not null"`
 	Category       category.Category
-	UserID         uuid.UUID `gorm:"type:varchar(100);not null" json:"user_id"`
-	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	UserID         uuid.UUID `gorm:"type:varchar(100);not null"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Rewards        []reward.Reward
 	Thumbnails     []thumbnail.Thumbnail
 }
