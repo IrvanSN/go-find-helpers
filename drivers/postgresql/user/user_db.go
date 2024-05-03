@@ -2,7 +2,11 @@ package user
 
 import (
 	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/rating"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/reward"
 	"github.com/irvansn/go-find-helpers/entities"
 	"time"
 )
@@ -18,6 +22,10 @@ type User struct {
 	Role           string    `gorm:"type:varchar(100);not null" json:"role"`
 	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Jobs           []job.Job
+	Rewards        []reward.Reward
+	Ratings        []rating.Rating
+	Addresses      []address.Address `gorm:"many2many:user_addresses;"`
 }
 
 func FromUseCase(user *entities.User) *User {
