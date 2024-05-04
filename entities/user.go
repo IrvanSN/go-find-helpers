@@ -16,12 +16,18 @@ type User struct {
 	Role           string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+	Jobs           []Job
+	Rewards        []Reward
+	Ratings        []Rating
+	Addresses      []Address
 }
 
-type RepositoryInterface interface {
+type UserRepositoryInterface interface {
 	SignUp(user *User) error
+	SignIn(user *User) error
 }
 
-type UseCaseInterface interface {
+type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
+	SignIn(user *User) (User, error)
 }
