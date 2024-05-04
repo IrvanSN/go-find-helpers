@@ -8,10 +8,10 @@ import (
 )
 
 type UserUseCase struct {
-	repository entities.RepositoryInterface
+	repository entities.UserRepositoryInterface
 }
 
-func NewUserUseCase(repository entities.RepositoryInterface) *UserUseCase {
+func NewUserUseCase(repository entities.UserRepositoryInterface) *UserUseCase {
 	return &UserUseCase{
 		repository: repository,
 	}

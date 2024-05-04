@@ -5,11 +5,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type RouteController struct {
+type UserRouteController struct {
 	UserController *controllers.UserController
 }
 
-func (r *RouteController) InitRoute(e *echo.Echo) {
+func (r *UserRouteController) InitRoute(e *echo.Echo) {
 	e.POST("/v1/sign-up", r.UserController.SignUp)
 	e.POST("/v1/sign-in", r.UserController.SignIn)
 }

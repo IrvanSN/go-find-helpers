@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/irvansn/go-find-helpers/config"
-	controllers "github.com/irvansn/go-find-helpers/controllers/user"
+	categoryController "github.com/irvansn/go-find-helpers/controllers/category"
+	userController "github.com/irvansn/go-find-helpers/controllers/user"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/routes"
 	"github.com/irvansn/go-find-helpers/usecases"
@@ -19,12 +21,21 @@ func main() {
 
 	userRepo := user.NewUserRepo(db)
 	userUseCase := usecases.NewUserUseCase(userRepo)
-	userController := controllers.NewUserController(userUseCase)
+	newUserController := userController.NewUserController(userUseCase)
 
-	routeController := routes.RouteController{
-		UserController: userController,
+	categoryRepo := category.NewCategoryRepo(db)
+	categoryUseCase := usecases.NewCategoryUseCase(categoryRepo)
+	newCategoryController := categoryController.NewCategoryController(categoryUseCase)
+
+	userRouteController := routes.UserRouteController{
+		UserController: newUserController,
+	}
+	categoryRouteController := routes.CategoryRouteController{
+		CategoryController: newCategoryController,
 	}
 
-	routeController.InitRoute(e)
+	userRouteController.InitRoute(e)
+	categoryRouteController.InitRoute(e)
+
 	e.Logger.Fatal(e.Start(":8080"))
 }

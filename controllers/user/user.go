@@ -15,7 +15,7 @@ import (
 )
 
 type UserController struct {
-	userUseCase entities.UseCaseInterface
+	userUseCase entities.UserUseCaseInterface
 }
 
 func (uc *UserController) SignUp(c echo.Context) error {
@@ -74,7 +74,7 @@ func (uc *UserController) SignIn(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
 }
 
-func NewUserController(userUseCase entities.UseCaseInterface) *UserController {
+func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {
 	return &UserController{
 		userUseCase: userUseCase,
 	}
