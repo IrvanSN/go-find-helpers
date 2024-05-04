@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"fmt"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"github.com/irvansn/go-find-helpers/controllers/base"
 	"github.com/irvansn/go-find-helpers/controllers/user/request"
 	"github.com/irvansn/go-find-helpers/controllers/user/response"
 	"github.com/irvansn/go-find-helpers/entities"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"github.com/irvansn/go-find-helpers/utils"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -29,14 +29,20 @@ func (uc *UserController) SignUp(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	token, errTokenCreation := jwt2.NewWithClaims(jwt2.SigningMethodHS256, jwt2.MapClaims{
-		"email":      user.Auth.Email,
-		"first_name": user.FirstName,
-		"last_name":  user.LastName,
-		"role":       user.Role,
-		"created_at": user.CreatedAt,
-		"exp":        time.Now().Add(time.Hour * 24).Unix(),
-	}).SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	tokenExpires := jwt2.NewNumericDate(time.Now().Add(time.Hour * 24))
+
+	claims := &middlewares.Claims{
+		RegisteredClaims: jwt2.RegisteredClaims{
+			ExpiresAt: tokenExpires,
+		},
+		ID:        user.ID,
+		Email:     user.Auth.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Role:      user.Role,
+	}
+
+	token, errTokenCreation := jwt2.NewWithClaims(jwt2.SigningMethodHS256, claims).SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if errTokenCreation != nil {
 		return c.JSON(utils.ConvertResponseCode(errTokenCreation), base.NewErrorResponse(errTokenCreation.Error()))
 	}
@@ -56,16 +62,20 @@ func (uc *UserController) SignIn(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	fmt.Println("user controller", user)
+	tokenExpires := jwt2.NewNumericDate(time.Now().Add(time.Hour * 24))
 
-	token, errTokenCreation := jwt2.NewWithClaims(jwt2.SigningMethodHS256, jwt2.MapClaims{
-		"email":      user.Auth.Email,
-		"first_name": user.FirstName,
-		"last_name":  user.LastName,
-		"role":       user.Role,
-		"created_at": user.CreatedAt,
-		"exp":        time.Now().Add(time.Hour * 24).Unix(),
-	}).SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	claims := &middlewares.Claims{
+		RegisteredClaims: jwt2.RegisteredClaims{
+			ExpiresAt: tokenExpires,
+		},
+		ID:        user.ID,
+		Email:     user.Auth.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Role:      user.Role,
+	}
+
+	token, errTokenCreation := jwt2.NewWithClaims(jwt2.SigningMethodHS256, claims).SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if errTokenCreation != nil {
 		return c.JSON(utils.ConvertResponseCode(errTokenCreation), base.NewErrorResponse(errTokenCreation.Error()))
 	}
