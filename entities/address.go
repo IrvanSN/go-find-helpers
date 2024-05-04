@@ -12,8 +12,8 @@ type Address struct {
 	State     string
 	ZipCode   string
 	Country   string
-	Long      string
-	Lat       string
+	Longitude string
+	Latitude  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -47,7 +47,7 @@ func (uc *UserController) SignUp(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errTokenCreation), base.NewErrorResponse(errTokenCreation.Error()))
 	}
 
-	userResponse := response.FromUseCase(&user, token)
+	userResponse := response.AuthResponseFromUseCase(&user, token)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
 }
 
@@ -80,7 +80,27 @@ func (uc *UserController) SignIn(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errTokenCreation), base.NewErrorResponse(errTokenCreation.Error()))
 	}
 
-	userResponse := response.FromUseCase(&user, token)
+	userResponse := response.AuthResponseFromUseCase(&user, token)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
+}
+
+func (uc *UserController) AddAddress(c echo.Context) error {
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	var userAddAddress request.UserAddAddress
+	if err := c.Bind(&userAddAddress); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	user, errUseCase := uc.userUseCase.AddAddress(userAddAddress.AddAddressToEntities(), userData.ID)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	userResponse := response.AddressResponseFromUseCase(&user)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
 }
 

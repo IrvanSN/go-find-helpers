@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
@@ -39,5 +40,17 @@ func (r *Repo) SignIn(user *entities.User) error {
 	}
 
 	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) AddAddress(user *entities.User) error {
+	userDb := AddressFromUseCase(user)
+	
+	if err := r.DB.Model(&userDb).Association("Addresses").Append(&userDb); err != nil {
+		fmt.Println("err", err)
+		return constant.ErrInsertDatabase
+	}
+
+	*user = *userDb.AddressToUseCase()
 	return nil
 }
