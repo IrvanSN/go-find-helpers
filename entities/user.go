@@ -16,6 +16,10 @@ type User struct {
 	Role           string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+	Jobs           []Job
+	Rewards        []Reward
+	Ratings        []Rating
+	Addresses      []Address
 }
 
 type RepositoryInterface interface {

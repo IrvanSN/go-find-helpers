@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/rating"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/reward"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/thumbnail"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -36,7 +41,16 @@ func ConnectDB(config Config) *gorm.DB {
 }
 
 func MigrationUser(db *gorm.DB) {
-	err := db.AutoMigrate(&user.User{}, &auth.Auth{}, address.Address{})
+	err := db.AutoMigrate(
+		&user.User{},
+		&auth.Auth{},
+		&address.Address{},
+		&category.Category{},
+		&job.Job{},
+		&rating.Rating{},
+		&reward.Reward{},
+		&thumbnail.Thumbnail{},
+	)
 	if err != nil {
 		return
 	}
