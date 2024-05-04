@@ -55,3 +55,18 @@ func (u *UserUseCase) SignIn(user *entities.User) (entities.User, error) {
 
 	return *user, nil
 }
+
+func (u *UserUseCase) AddAddress(user *entities.User, userId uuid.UUID) (entities.User, error) {
+	if user.Addresses[0].Address == "" || user.Addresses[0].Latitude == "" || user.Addresses[0].ZipCode == "" || user.Addresses[0].State == "" || user.Addresses[0].Country == "" || user.Addresses[0].City == "" {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	user.ID = userId
+	user.Addresses[0].ID = uuid.New()
+	
+	if err := u.repository.AddAddress(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}

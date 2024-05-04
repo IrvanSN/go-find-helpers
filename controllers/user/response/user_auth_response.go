@@ -5,7 +5,7 @@ import (
 	"github.com/irvansn/go-find-helpers/entities"
 )
 
-type UserResponse struct {
+type UserAuthResponse struct {
 	ID        uuid.UUID `json:"id"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
@@ -14,8 +14,8 @@ type UserResponse struct {
 	UserToken string    `json:"user_token"`
 }
 
-func FromUseCase(user *entities.User, token string) *UserResponse {
-	return &UserResponse{
+func AuthResponseFromUseCase(user *entities.User, token string) *UserAuthResponse {
+	return &UserAuthResponse{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
