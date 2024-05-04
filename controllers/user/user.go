@@ -101,7 +101,22 @@ func (uc *UserController) AddAddress(c echo.Context) error {
 	}
 
 	userResponse := response.AddressResponseFromUseCase(&user)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success add address!", userResponse))
+}
+
+func (uc *UserController) GetAllAddresses(c echo.Context) error {
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	user, errUseCase := uc.userUseCase.GetAllAddresses(&entities.User{ID: userData.ID})
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	userResponse := response.AllAddressesResponseFromUseCase(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get all addresses!", userResponse))
 }
 
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {
