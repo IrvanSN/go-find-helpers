@@ -22,12 +22,12 @@ type User struct {
 	Addresses      []Address
 }
 
-type RepositoryInterface interface {
+type UserRepositoryInterface interface {
 	SignUp(user *User) error
 	SignIn(user *User) error
 }
 
-type UseCaseInterface interface {
+type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
 }
