@@ -21,3 +21,11 @@ type Job struct {
 	Rewards        []Reward
 	Thumbnails     []Thumbnail
 }
+
+type JobRepositoryInterface interface {
+	Create(Job *Job) error
+}
+
+type JobUseCaseInterface interface {
+	Create(Job *Job) (Job, error)
+}
