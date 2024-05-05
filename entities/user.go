@@ -26,10 +26,12 @@ type UserRepositoryInterface interface {
 	SignUp(user *User) error
 	SignIn(user *User) error
 	AddAddress(user *User) error
+	GetAllAddresses(user *User) error
 }
 
 type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
 	AddAddress(user *User, userId uuid.UUID) (User, error)
+	GetAllAddresses(user *User) (User, error)
 }
