@@ -17,7 +17,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Jobs           []Job
-	Rewards        []Reward
+	Rewards        []Transaction
 	Ratings        []Rating
 	Addresses      []Address
 }
@@ -25,9 +25,11 @@ type User struct {
 type UserRepositoryInterface interface {
 	SignUp(user *User) error
 	SignIn(user *User) error
+	AddAddress(user *User) error
 }
 
 type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
+	AddAddress(user *User, userId uuid.UUID) (User, error)
 }

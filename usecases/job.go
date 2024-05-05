@@ -1,0 +1,58 @@
+package usecases
+
+import (
+	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/constant"
+	"github.com/irvansn/go-find-helpers/entities"
+	"github.com/irvansn/go-find-helpers/middlewares"
+)
+
+type JobUseCase struct {
+	repository entities.JobRepositoryInterface
+}
+
+func NewJobUseCase(repository entities.JobRepositoryInterface) *JobUseCase {
+	return &JobUseCase{
+		repository: repository,
+	}
+}
+
+func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if job.Title == "" || job.Description == "" {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	if job.RewardEarned < 10000 || job.HelperRequired < 1 {
+		return entities.Job{}, constant.ErrInvalidRequest
+	}
+
+	job.ID = uuid.New()
+	job.Status = "CLOSED"
+	job.User.ID = user.ID
+
+	transaction := entities.Transaction{}
+	transaction.ID = uuid.New()
+	transaction.Payment.ID = uuid.New()
+	transaction.Payment.TransactionID = transaction.ID
+
+	subTotal := job.RewardEarned * float64(job.HelperRequired)
+	tax := (subTotal / 100) * 5
+
+	transaction.Type = "MONEY_OUT"
+	transaction.Status = "PENDING"
+	transaction.User = entities.User{ID: user.ID}
+	transaction.Job = entities.Job{ID: job.ID}
+	transaction.SubTotal = subTotal
+	transaction.Tax = tax
+	transaction.Total = subTotal + tax
+
+	transaction.Payment.Amount = int64(transaction.Total)
+
+	job.Transactions = append(job.Transactions, transaction)
+
+	if err := j.repository.Create(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}

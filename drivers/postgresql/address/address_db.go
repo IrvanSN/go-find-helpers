@@ -12,8 +12,8 @@ type Address struct {
 	State     string    `gorm:"type:varchar(50);not null"`
 	ZipCode   string    `gorm:"type:varchar(10);not null"`
 	Country   string    `gorm:"type:varchar(50);not null"`
-	Long      string    `gorm:"type:varchar(100);not null"`
-	Lat       string    `gorm:"type:varchar(100);not null"`
+	Longitude string    `gorm:"type:varchar(100);not null"`
+	Latitude  string    `gorm:"type:varchar(100);not null"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
