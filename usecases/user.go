@@ -63,8 +63,16 @@ func (u *UserUseCase) AddAddress(user *entities.User, userId uuid.UUID) (entitie
 
 	user.ID = userId
 	user.Addresses[0].ID = uuid.New()
-	
+
 	if err := u.repository.AddAddress(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) GetAllAddresses(user *entities.User) (entities.User, error) {
+	if err := u.repository.GetAllAddresses(user); err != nil {
 		return entities.User{}, err
 	}
 

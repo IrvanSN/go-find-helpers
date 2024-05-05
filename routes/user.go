@@ -16,5 +16,6 @@ func (r *UserRouteController) InitRoute(e *echo.Echo) {
 
 	u := e.Group("/v1/users")
 	u.Use(middlewares.JWTMiddleware)
-	u.POST("/address", r.UserController.AddAddress)
+	u.POST("/addresses", r.UserController.AddAddress)
+	u.GET("/addresses", r.UserController.GetAllAddresses)
 }
