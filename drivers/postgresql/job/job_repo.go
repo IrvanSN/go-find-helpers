@@ -2,10 +2,9 @@ package job
 
 import (
 	"errors"
-	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
-	"github.com/irvansn/go-find-helpers/utils"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"gorm.io/gorm"
 )
 
@@ -17,10 +16,13 @@ func NewJobRepo(db *gorm.DB) *Repo {
 	return &Repo{DB: db}
 }
 
-func (r *Repo) Create(job *entities.Job) error {
+func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 	jobDb := FromUseCase(job)
 
-	fmt.Println(utils.PrettyPrint(jobDb))
+	err := jobDb.Transactions[0].Payment.Create(user.Email)
+	if err != nil {
+		return err
+	}
 
 	if err := r.DB.Omit("FromAddress").Omit("ToAddress").Create(&jobDb).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {

@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/payment"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/thumbnail"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/entities"
@@ -34,10 +35,16 @@ func FromUseCase(job *entities.Job) *Job {
 	jobTransactions := make([]transaction.Transaction, len(job.Transactions))
 	for i, _transaction := range job.Transactions {
 		jobTransactions[i] = transaction.Transaction{
-			ID:        _transaction.ID,
-			UserID:    _transaction.User.ID,
-			Type:      _transaction.Type,
-			Status:    _transaction.Status,
+			ID:     _transaction.ID,
+			UserID: _transaction.User.ID,
+			Type:   _transaction.Type,
+			Payment: payment.Payment{
+				ID:            _transaction.Payment.ID,
+				ExternalID:    _transaction.Payment.ExternalID,
+				TransactionID: _transaction.Payment.TransactionID,
+				Amount:        _transaction.Payment.Amount,
+				InvoiceURL:    _transaction.Payment.InvoiceURL,
+			},
 			CreatedAt: _transaction.CreatedAt,
 			UpdatedAt: _transaction.UpdatedAt,
 		}
@@ -75,9 +82,15 @@ func (j *Job) ToUseCase() *entities.Job {
 	jobTransactions := make([]entities.Transaction, len(j.Transactions))
 	for i, _transaction := range j.Transactions {
 		jobTransactions[i] = entities.Transaction{
-			ID:        _transaction.ID,
-			Type:      _transaction.Type,
-			Status:    _transaction.Status,
+			ID:   _transaction.ID,
+			Type: _transaction.Type,
+			Payment: entities.Payment{
+				ID:            _transaction.Payment.ID,
+				ExternalID:    _transaction.Payment.ExternalID,
+				TransactionID: _transaction.Payment.TransactionID,
+				Amount:        _transaction.Payment.Amount,
+				InvoiceURL:    _transaction.Payment.InvoiceURL,
+			},
 			CreatedAt: _transaction.CreatedAt,
 			UpdatedAt: _transaction.UpdatedAt,
 		}

@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"time"
 )
 
@@ -23,9 +24,9 @@ type Job struct {
 }
 
 type JobRepositoryInterface interface {
-	Create(Job *Job) error
+	Create(Job *Job, user *middlewares.Claims) error
 }
 
 type JobUseCaseInterface interface {
-	Create(Job *Job, userId uuid.UUID) (Job, error)
+	Create(Job *Job, user *middlewares.Claims) (Job, error)
 }

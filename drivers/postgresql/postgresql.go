@@ -6,6 +6,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/payment"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/rating"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/thumbnail"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
@@ -49,6 +50,7 @@ func MigrationUser(db *gorm.DB) {
 		&job.Job{},
 		&rating.Rating{},
 		&transaction.Transaction{},
+		&payment.Payment{},
 		&thumbnail.Thumbnail{},
 	)
 	if err != nil {
