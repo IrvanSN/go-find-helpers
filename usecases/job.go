@@ -18,6 +18,10 @@ func NewJobUseCase(repository entities.JobRepositoryInterface) *JobUseCase {
 }
 
 func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
 	if job.Title == "" || job.Description == "" {
 		return entities.Job{}, constant.ErrEmptyInput
 	}
