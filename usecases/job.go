@@ -60,3 +60,52 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 
 	return *job, nil
 }
+
+func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if job.ID == uuid.Nil {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	job.User.ID = user.ID
+
+	if user.Role != "HELPER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	// Todo: checks if HelperRequired + 1 greater than len of transactions
+
+	if job.Status != "OPEN" {
+		return entities.Job{}, constant.ErrJobNotOpened
+	}
+
+	var transaction entities.Transaction
+	transaction.ID = uuid.New()
+	transaction.Type = "MONEY_IN"
+	transaction.Status = "PENDING"
+	transaction.User = entities.User{ID: user.ID}
+	transaction.Job = entities.Job{ID: job.ID}
+
+	transaction.SubTotal = job.RewardEarned
+	tax := (transaction.SubTotal / 100) * 5
+	transaction.Tax = tax
+	transaction.Total = transaction.SubTotal - tax
+
+	transaction.Payment.ID = uuid.New()
+	transaction.Payment.TransactionID = transaction.ID
+	transaction.Payment.Amount = int64(transaction.Total)
+
+	var newJob entities.Job
+	newJob.ID = job.ID
+	newJob.User.ID = user.ID
+	newJob.Transactions = append(newJob.Transactions, transaction)
+
+	if err := j.repository.AddHelper(&newJob); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}

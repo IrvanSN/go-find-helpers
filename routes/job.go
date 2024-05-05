@@ -13,5 +13,6 @@ type JobRouteController struct {
 func (r *JobRouteController) InitRoute(e *echo.Echo) {
 	j := e.Group("/v1/jobs")
 	j.Use(middlewares.JWTMiddleware)
-	j.POST("", r.JobController.Create)
+	j.POST("/post", r.JobController.Create)
+	j.POST("/take", r.JobController.Take)
 }

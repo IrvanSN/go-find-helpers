@@ -43,6 +43,10 @@ func (r *Repo) SignIn(user *entities.User) error {
 	return nil
 }
 
+func (r *Repo) Find(user *entities.User) error {
+	return nil
+}
+
 func (r *Repo) AddAddress(user *entities.User) error {
 	userDb := AddressFromUseCase(user)
 

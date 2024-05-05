@@ -6,6 +6,7 @@ import (
 	"github.com/irvansn/go-find-helpers/entities"
 	"github.com/irvansn/go-find-helpers/middlewares"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repo struct {
@@ -29,6 +30,35 @@ func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 			return constant.ErrDuplicatedData
 		}
 		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Find(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Preload(clause.Associations).First(&jobDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) AddHelper(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Model(&jobDb).Association("Transactions").Append(&jobDb.Transactions); err != nil {
+		return constant.ErrInsertDatabase
+	}
+
+	if err := r.DB.Create(&jobDb.Transactions[0].Payment).Error; err != nil {
+		return constant.ErrInsertDatabase
 	}
 
 	*job = *jobDb.ToUseCase()

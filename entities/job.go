@@ -25,8 +25,11 @@ type Job struct {
 
 type JobRepositoryInterface interface {
 	Create(Job *Job, user *middlewares.Claims) error
+	Find(job *Job) error
+	AddHelper(job *Job) error
 }
 
 type JobUseCaseInterface interface {
-	Create(Job *Job, user *middlewares.Claims) (Job, error)
+	Create(job *Job, user *middlewares.Claims) (Job, error)
+	Take(job *Job, user *middlewares.Claims) (Job, error)
 }
