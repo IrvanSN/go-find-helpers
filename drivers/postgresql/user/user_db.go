@@ -6,7 +6,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/rating"
-	"github.com/irvansn/go-find-helpers/drivers/postgresql/reward"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/entities"
 	"time"
 )
@@ -23,7 +23,7 @@ type User struct {
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Jobs           []job.Job
-	Rewards        []reward.Reward
+	Rewards        []transaction.Transaction
 	Ratings        []rating.Rating
 	Addresses      []address.Address `gorm:"many2many:user_addresses;"`
 }

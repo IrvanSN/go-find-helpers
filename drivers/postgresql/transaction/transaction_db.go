@@ -1,11 +1,11 @@
-package reward
+package transaction
 
 import (
 	"github.com/google/uuid"
 	"time"
 )
 
-type Reward struct {
+type Transaction struct {
 	ID                uuid.UUID `gorm:"type:varchar(100);"`
 	Type              string    `gorm:"type:varchar(100);not null"`
 	Status            string    `gorm:"type:varchar(50);not null"`

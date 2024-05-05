@@ -2,6 +2,7 @@ package routes
 
 import (
 	controllers "github.com/irvansn/go-find-helpers/controllers/job"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"github.com/labstack/echo/v4"
 )
 
@@ -10,5 +11,7 @@ type JobRouteController struct {
 }
 
 func (r *JobRouteController) InitRoute(e *echo.Echo) {
-	e.POST("/v1/job", r.JobController.Create)
+	j := e.Group("/v1/jobs")
+	j.Use(middlewares.JWTMiddleware)
+	j.POST("", r.JobController.Create)
 }

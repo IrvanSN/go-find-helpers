@@ -17,7 +17,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Jobs           []Job
-	Rewards        []Reward
+	Rewards        []Transaction
 	Ratings        []Rating
 	Addresses      []Address
 }

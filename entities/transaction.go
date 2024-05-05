@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Reward struct {
+type Transaction struct {
 	ID                uuid.UUID
 	Type              string
 	Status            string

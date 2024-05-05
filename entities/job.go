@@ -9,16 +9,16 @@ type Job struct {
 	ID             uuid.UUID
 	Title          string
 	Description    string
-	Reward         float64
+	RewardEarned   float64
 	FromAddress    Address
 	ToAddress      Address
 	Status         string
 	HelperRequired uint
 	Category       Category
-	UserID         User
+	User           User
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	Rewards        []Reward
+	Transactions   []Transaction
 	Thumbnails     []Thumbnail
 }
 
@@ -27,5 +27,5 @@ type JobRepositoryInterface interface {
 }
 
 type JobUseCaseInterface interface {
-	Create(Job *Job) (Job, error)
+	Create(Job *Job, userId uuid.UUID) (Job, error)
 }
