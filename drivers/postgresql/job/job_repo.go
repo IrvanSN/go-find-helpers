@@ -64,3 +64,17 @@ func (r *Repo) AddHelper(job *entities.Job) error {
 	*job = *jobDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) UpdateStatus(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", jobDb.Status).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}

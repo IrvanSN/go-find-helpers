@@ -37,12 +37,16 @@ func FromUseCase(job *entities.Job) *Job {
 	jobTransactions := make([]transaction.Transaction, len(job.Transactions))
 	for i, _transaction := range job.Transactions {
 		jobTransactions[i] = transaction.Transaction{
-			ID:     _transaction.ID,
-			UserID: _transaction.User.ID,
-			Type:   _transaction.Type,
+			ID:       _transaction.ID,
+			UserID:   _transaction.User.ID,
+			Type:     _transaction.Type,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
 			Payment: payment.Payment{
 				ID:            _transaction.Payment.ID,
 				ExternalID:    _transaction.Payment.ExternalID,
+				Status:        _transaction.Payment.Status,
 				TransactionID: _transaction.Payment.TransactionID,
 				Amount:        _transaction.Payment.Amount,
 				InvoiceURL:    _transaction.Payment.InvoiceURL,
@@ -85,11 +89,15 @@ func (j *Job) ToUseCase() *entities.Job {
 	jobTransactions := make([]entities.Transaction, len(j.Transactions))
 	for i, _transaction := range j.Transactions {
 		jobTransactions[i] = entities.Transaction{
-			ID:   _transaction.ID,
-			Type: _transaction.Type,
+			ID:       _transaction.ID,
+			Type:     _transaction.Type,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
 			Payment: entities.Payment{
 				ID:            _transaction.Payment.ID,
 				ExternalID:    _transaction.Payment.ExternalID,
+				Status:        _transaction.Payment.Status,
 				TransactionID: _transaction.Payment.TransactionID,
 				Amount:        _transaction.Payment.Amount,
 				InvoiceURL:    _transaction.Payment.InvoiceURL,

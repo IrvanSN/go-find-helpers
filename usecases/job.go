@@ -43,7 +43,7 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 	tax := (subTotal / 100) * 5
 
 	transaction.Type = "MONEY_OUT"
-	transaction.Status = "PENDING"
+	transaction.Payment.Status = "PENDING"
 	transaction.User = entities.User{ID: user.ID}
 	transaction.Job = entities.Job{ID: job.ID}
 	transaction.SubTotal = subTotal
@@ -76,16 +76,37 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, err
 	}
 
-	// Todo: checks if HelperRequired + 1 greater than len of transactions
-
 	if job.Status != "OPEN" {
 		return entities.Job{}, constant.ErrJobNotOpened
+	}
+
+	helperAlreadyTakeTheJob := false
+	for _, transaction := range job.Transactions {
+		if transaction.User.ID == job.User.ID && transaction.Type == "MONEY_IN" {
+			helperAlreadyTakeTheJob = true
+			break
+		}
+	}
+
+	if helperAlreadyTakeTheJob {
+		return entities.Job{}, constant.ErrHelperAlreadyTakeTheJob
+	}
+
+	if (len(job.Transactions) + 1) > (int(job.HelperRequired) + 1) {
+		return entities.Job{}, constant.ErrJobAlreadyFull
+	}
+
+	if (int(job.HelperRequired) + 1) == (len(job.Transactions) + 1) {
+		job.Status = "CLOSED"
+		if err := j.repository.UpdateStatus(job); err != nil {
+			return entities.Job{}, constant.ErrFailedUpdate
+		}
 	}
 
 	var transaction entities.Transaction
 	transaction.ID = uuid.New()
 	transaction.Type = "MONEY_IN"
-	transaction.Status = "PENDING"
+	transaction.Payment.Status = "PENDING"
 	transaction.User = entities.User{ID: user.ID}
 	transaction.Job = entities.Job{ID: job.ID}
 

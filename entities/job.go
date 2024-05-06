@@ -27,6 +27,7 @@ type JobRepositoryInterface interface {
 	Create(Job *Job, user *middlewares.Claims) error
 	Find(job *Job) error
 	AddHelper(job *Job) error
+	UpdateStatus(job *Job) error
 }
 
 type JobUseCaseInterface interface {

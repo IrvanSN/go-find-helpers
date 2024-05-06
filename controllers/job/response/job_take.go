@@ -10,11 +10,17 @@ type JobTakeResponse struct {
 }
 
 func TakeResponseFromUseCase(job *entities.Job) *JobTakeResponse {
+	var rewardTotal int64
+	for _, transaction := range job.Transactions {
+		if transaction.User.ID == job.User.ID && transaction.Type == "MONEY_IN" {
+			rewardTotal = int64(transaction.Total)
+			break
+		}
+	}
 	return &JobTakeResponse{
 		JobId:       job.ID.String(),
 		Title:       job.Title,
 		Description: job.Description,
-		// Todo: handle payment.amount transactions created by helper user
-		Reward: int64(job.RewardEarned),
+		Reward:      rewardTotal,
 	}
 }
