@@ -35,6 +35,26 @@ func (jc *JobController) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success create Job, please pay the commission before the due date!", jobCreateResponse))
 }
 
+func (jc *JobController) Take(c echo.Context) error {
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	var jobTake request.JobTakeRequest
+	if err := c.Bind(&jobTake); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	job, errUseCase := jc.jobUseCase.Take(jobTake.JobTakeToEntities(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobTakeResponse := response.TakeResponseFromUseCase(&job)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success take a Job, please complete the job to get the reward!", jobTakeResponse))
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }

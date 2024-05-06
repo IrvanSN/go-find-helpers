@@ -7,6 +7,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/payment"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/thumbnail"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
 	"time"
 )
@@ -25,6 +26,7 @@ type Job struct {
 	CategoryID     uuid.UUID `gorm:"type:varchar(100);not null"`
 	Category       category.Category
 	UserID         uuid.UUID `gorm:"type:varchar(100);not null"`
+	User           user.User
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Transactions   []transaction.Transaction
@@ -35,12 +37,16 @@ func FromUseCase(job *entities.Job) *Job {
 	jobTransactions := make([]transaction.Transaction, len(job.Transactions))
 	for i, _transaction := range job.Transactions {
 		jobTransactions[i] = transaction.Transaction{
-			ID:     _transaction.ID,
-			UserID: _transaction.User.ID,
-			Type:   _transaction.Type,
+			ID:       _transaction.ID,
+			UserID:   _transaction.User.ID,
+			Type:     _transaction.Type,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
 			Payment: payment.Payment{
 				ID:            _transaction.Payment.ID,
 				ExternalID:    _transaction.Payment.ExternalID,
+				Status:        _transaction.Payment.Status,
 				TransactionID: _transaction.Payment.TransactionID,
 				Amount:        _transaction.Payment.Amount,
 				InvoiceURL:    _transaction.Payment.InvoiceURL,
@@ -54,6 +60,7 @@ func FromUseCase(job *entities.Job) *Job {
 		jobThumbnails[i] = thumbnail.Thumbnail{
 			ID:          uuid.New(),
 			ImageKey:    _thumbnail.ImageKey,
+			JobID:       job.ID,
 			Description: _thumbnail.Description,
 		}
 	}
@@ -82,11 +89,15 @@ func (j *Job) ToUseCase() *entities.Job {
 	jobTransactions := make([]entities.Transaction, len(j.Transactions))
 	for i, _transaction := range j.Transactions {
 		jobTransactions[i] = entities.Transaction{
-			ID:   _transaction.ID,
-			Type: _transaction.Type,
+			ID:       _transaction.ID,
+			Type:     _transaction.Type,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
 			Payment: entities.Payment{
 				ID:            _transaction.Payment.ID,
 				ExternalID:    _transaction.Payment.ExternalID,
+				Status:        _transaction.Payment.Status,
 				TransactionID: _transaction.Payment.TransactionID,
 				Amount:        _transaction.Payment.Amount,
 				InvoiceURL:    _transaction.Payment.InvoiceURL,
@@ -105,18 +116,43 @@ func (j *Job) ToUseCase() *entities.Job {
 	}
 
 	return &entities.Job{
-		ID:             j.ID,
-		Title:          j.Title,
-		Description:    j.Description,
-		RewardEarned:   j.RewardEarned,
-		FromAddress:    entities.Address{ID: j.FromAddress.ID},
-		ToAddress:      entities.Address{ID: j.ToAddress.ID},
+		ID:           j.ID,
+		Title:        j.Title,
+		Description:  j.Description,
+		RewardEarned: j.RewardEarned,
+		FromAddress: entities.Address{
+			ID:        j.FromAddress.ID,
+			Address:   j.FromAddress.Address,
+			City:      j.FromAddress.City,
+			State:     j.FromAddress.State,
+			Country:   j.FromAddress.Country,
+			ZipCode:   j.FromAddress.ZipCode,
+			Longitude: j.FromAddress.Longitude,
+			Latitude:  j.FromAddress.Latitude,
+			CreatedAt: j.FromAddress.CreatedAt,
+			UpdatedAt: j.FromAddress.UpdatedAt,
+		},
+		ToAddress: entities.Address{
+			ID:        j.ToAddress.ID,
+			Address:   j.ToAddress.Address,
+			City:      j.ToAddress.City,
+			State:     j.ToAddress.State,
+			Country:   j.ToAddress.Country,
+			ZipCode:   j.ToAddress.ZipCode,
+			Longitude: j.ToAddress.Longitude,
+			Latitude:  j.ToAddress.Latitude,
+			CreatedAt: j.ToAddress.CreatedAt,
+			UpdatedAt: j.ToAddress.UpdatedAt,
+		},
 		Status:         j.Status,
 		HelperRequired: j.HelperRequired,
-		Category:       entities.Category{ID: j.Category.ID},
-		CreatedAt:      j.CreatedAt,
-		UpdatedAt:      j.UpdatedAt,
-		Transactions:   jobTransactions,
-		Thumbnails:     jobThumbnails,
+		Category: entities.Category{
+			ID:   j.Category.ID,
+			Name: j.Category.Name,
+		},
+		CreatedAt:    j.CreatedAt,
+		UpdatedAt:    j.UpdatedAt,
+		Transactions: jobTransactions,
+		Thumbnails:   jobThumbnails,
 	}
 }
