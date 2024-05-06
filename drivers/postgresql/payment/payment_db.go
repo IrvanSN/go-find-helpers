@@ -12,6 +12,7 @@ import (
 type Payment struct {
 	ID            uuid.UUID `gorm:"type:varchar(100);"`
 	TransactionID uuid.UUID `gorm:"type:varchar(100);"`
+	Status        string    `gorm:"type:varchar(50);"`
 	ExternalID    string    `gorm:"type:varchar(100);"`
 	Amount        int64     `gorm:"type:decimal;not null"`
 	InvoiceURL    string    `gorm:"type:text;"`

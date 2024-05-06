@@ -25,6 +25,7 @@ type User struct {
 type UserRepositoryInterface interface {
 	SignUp(user *User) error
 	SignIn(user *User) error
+	Find(user *User) error
 	AddAddress(user *User) error
 	GetAllAddresses(user *User) error
 }
@@ -32,6 +33,7 @@ type UserRepositoryInterface interface {
 type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
+	Find(user *User) (User, error)
 	AddAddress(user *User, userId uuid.UUID) (User, error)
 	GetAllAddresses(user *User) (User, error)
 }
