@@ -82,7 +82,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	helperAlreadyTakeTheJob := false
 	for _, transaction := range job.Transactions {
-		if transaction.User.ID == job.User.ID && transaction.Type == "MONEY_IN" {
+		if transaction.User.ID == user.ID && transaction.Type == "MONEY_IN" {
 			helperAlreadyTakeTheJob = true
 			break
 		}
