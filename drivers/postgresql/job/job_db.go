@@ -58,7 +58,7 @@ func FromUseCase(job *entities.Job) *Job {
 	jobThumbnails := make([]thumbnail.Thumbnail, len(job.Thumbnails))
 	for i, _thumbnail := range job.Thumbnails {
 		jobThumbnails[i] = thumbnail.Thumbnail{
-			ID:          uuid.New(),
+			ID:          _thumbnail.ID,
 			ImageKey:    _thumbnail.ImageKey,
 			JobID:       job.ID,
 			Description: _thumbnail.Description,

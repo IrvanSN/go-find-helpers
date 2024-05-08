@@ -55,6 +55,20 @@ func (jc *JobController) Take(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success take a Job, please complete the job to get the reward!", jobTakeResponse))
 }
 
+func (jc *JobController) JobPaymentCallback(c echo.Context) error {
+	var jobPaymentCallback request.JobPaymentCallbackRequest
+	if err := c.Bind(&jobPaymentCallback); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	_, errUseCase := jc.jobUseCase.PaymentCallback(jobPaymentCallback.JobPaymentCallbackToEntities())
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	return nil
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }
