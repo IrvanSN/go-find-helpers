@@ -44,7 +44,7 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 
 	transaction.Type = "MONEY_OUT"
 	transaction.Payment.Status = "PENDING"
-	transaction.User = entities.User{ID: user.ID}
+	transaction.UserID = user.ID
 	transaction.Job = entities.Job{ID: job.ID}
 	transaction.SubTotal = subTotal
 	transaction.Tax = tax
@@ -82,7 +82,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	helperAlreadyTakeTheJob := false
 	for _, transaction := range job.Transactions {
-		if transaction.User.ID == user.ID && transaction.Type == "MONEY_IN" {
+		if transaction.UserID == user.ID && transaction.Type == "MONEY_IN" {
 			helperAlreadyTakeTheJob = true
 			break
 		}
@@ -107,7 +107,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	transaction.ID = uuid.New()
 	transaction.Type = "MONEY_IN"
 	transaction.Payment.Status = "PENDING"
-	transaction.User = entities.User{ID: user.ID}
+	transaction.UserID = user.ID
 	transaction.Job = entities.Job{ID: job.ID}
 
 	transaction.SubTotal = job.RewardEarned

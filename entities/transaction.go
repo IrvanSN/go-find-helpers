@@ -8,7 +8,7 @@ import (
 type Transaction struct {
 	ID        uuid.UUID
 	Type      string
-	User      User
+	UserID    uuid.UUID
 	Job       Job
 	SubTotal  float64
 	Tax       float64
