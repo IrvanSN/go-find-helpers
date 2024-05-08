@@ -70,7 +70,7 @@ func FromUseCase(job *entities.Job) *Job {
 		Title:          job.Title,
 		Description:    job.Description,
 		RewardEarned:   job.RewardEarned,
-		UserID:         job.User.ID,
+		UserID:         job.UserID,
 		FromAddressID:  job.FromAddress.ID,
 		FromAddress:    address.Address{ID: job.FromAddress.ID},
 		ToAddressID:    job.ToAddress.ID,
@@ -121,7 +121,7 @@ func (j *Job) ToUseCase() *entities.Job {
 	return &entities.Job{
 		ID:           j.ID,
 		Title:        j.Title,
-		User:         entities.User{ID: j.UserID},
+		UserID:       j.UserID,
 		Description:  j.Description,
 		RewardEarned: j.RewardEarned,
 		FromAddress: entities.Address{

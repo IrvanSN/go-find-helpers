@@ -32,7 +32,7 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 
 	job.ID = uuid.New()
 	job.Status = "CLOSED"
-	job.User.ID = user.ID
+	job.UserID = user.ID
 
 	transaction := entities.Transaction{}
 	transaction.ID = uuid.New()
@@ -66,7 +66,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, constant.ErrEmptyInput
 	}
 
-	job.User.ID = user.ID
+	job.UserID = user.ID
 
 	if user.Role != "HELPER" {
 		return entities.Job{}, constant.ErrNotAuthorized
@@ -121,7 +121,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	var newJob entities.Job
 	newJob.ID = job.ID
-	newJob.User.ID = user.ID
+	newJob.UserID = user.ID
 	newJob.Transactions = append(newJob.Transactions, transaction)
 
 	if err := j.repository.AddHelper(&newJob); err != nil {
