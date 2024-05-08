@@ -16,7 +16,7 @@ type Job struct {
 	Status         string
 	HelperRequired uint
 	Category       Category
-	User           User
+	UserID         uuid.UUID
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Transactions   []Transaction
