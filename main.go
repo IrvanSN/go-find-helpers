@@ -12,6 +12,7 @@ import (
 	"github.com/irvansn/go-find-helpers/routes"
 	"github.com/irvansn/go-find-helpers/usecases"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -20,6 +21,7 @@ func main() {
 	db := postgresql.ConnectDB(config.InitConfigMySQL())
 
 	e := echo.New()
+	e.Use(middleware.Logger())
 
 	userRepo := user.NewUserRepo(db)
 	userUseCase := usecases.NewUserUseCase(userRepo)
