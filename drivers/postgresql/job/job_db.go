@@ -58,7 +58,7 @@ func FromUseCase(job *entities.Job) *Job {
 	jobThumbnails := make([]thumbnail.Thumbnail, len(job.Thumbnails))
 	for i, _thumbnail := range job.Thumbnails {
 		jobThumbnails[i] = thumbnail.Thumbnail{
-			ID:          uuid.New(),
+			ID:          _thumbnail.ID,
 			ImageKey:    _thumbnail.ImageKey,
 			JobID:       job.ID,
 			Description: _thumbnail.Description,
@@ -89,8 +89,11 @@ func (j *Job) ToUseCase() *entities.Job {
 	jobTransactions := make([]entities.Transaction, len(j.Transactions))
 	for i, _transaction := range j.Transactions {
 		jobTransactions[i] = entities.Transaction{
-			ID:       _transaction.ID,
-			Type:     _transaction.Type,
+			ID:   _transaction.ID,
+			Type: _transaction.Type,
+			User: entities.User{
+				ID: _transaction.UserID,
+			},
 			SubTotal: _transaction.SubTotal,
 			Tax:      _transaction.Tax,
 			Total:    _transaction.Total,
@@ -118,6 +121,7 @@ func (j *Job) ToUseCase() *entities.Job {
 	return &entities.Job{
 		ID:           j.ID,
 		Title:        j.Title,
+		User:         entities.User{ID: j.UserID},
 		Description:  j.Description,
 		RewardEarned: j.RewardEarned,
 		FromAddress: entities.Address{

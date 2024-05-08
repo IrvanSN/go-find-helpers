@@ -25,6 +25,7 @@ func (r *JobCreateRequest) JobCreateToEntities() *entities.Job {
 	thumbnails := make([]entities.Thumbnail, len(r.Thumbnails))
 	for i, t := range r.Thumbnails {
 		thumbnails[i] = entities.Thumbnail{
+			ID:          uuid.New(),
 			ImageKey:    t.ImageKey,
 			Description: t.Description,
 		}

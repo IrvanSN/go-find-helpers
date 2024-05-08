@@ -28,9 +28,11 @@ type JobRepositoryInterface interface {
 	Find(job *Job) error
 	AddHelper(job *Job) error
 	UpdateStatus(job *Job) error
+	PaymentCallback(job *Job) error
 }
 
 type JobUseCaseInterface interface {
 	Create(job *Job, user *middlewares.Claims) (Job, error)
 	Take(job *Job, user *middlewares.Claims) (Job, error)
+	PaymentCallback(job *Job) (Job, error)
 }

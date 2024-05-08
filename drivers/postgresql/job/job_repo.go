@@ -78,3 +78,18 @@ func (r *Repo) UpdateStatus(job *entities.Job) error {
 	*job = *jobDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) PaymentCallback(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Model(&jobDb.Transactions[0].Payment).Where("id = ?", jobDb.Transactions[0].Payment.ID).Update("status", jobDb.Transactions[0].Payment.Status).Error; err != nil {
+		return constant.ErrFailedUpdate
+	}
+
+	if err := r.DB.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", jobDb.Status).Error; err != nil {
+		return constant.ErrFailedUpdate
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}

@@ -3,8 +3,8 @@ package payment
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/constant"
 	"net/http"
 	"os"
 )
@@ -58,10 +58,13 @@ func (p *Payment) Create(email string) error {
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.Status != "200 OK" {
+		return constant.ErrPaymentGateway
+	}
 
 	var response xdtInvoiceResponse
 	err = json.NewDecoder(res.Body).Decode(&response)

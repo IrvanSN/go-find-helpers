@@ -11,6 +11,10 @@ type JobRouteController struct {
 }
 
 func (r *JobRouteController) InitRoute(e *echo.Echo) {
+	c := e.Group("/v1/callback")
+	c.Use(middlewares.CallbackAuth)
+	c.POST("/xdt", r.JobController.JobPaymentCallback)
+
 	j := e.Group("/v1/jobs")
 	j.Use(middlewares.JWTMiddleware)
 	j.POST("/post", r.JobController.Create)
