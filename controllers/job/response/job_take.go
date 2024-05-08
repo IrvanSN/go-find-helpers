@@ -12,7 +12,7 @@ type JobTakeResponse struct {
 func TakeResponseFromUseCase(job *entities.Job) *JobTakeResponse {
 	var rewardTotal int64
 	for _, transaction := range job.Transactions {
-		if transaction.User.ID == job.UserID && transaction.Type == "MONEY_IN" {
+		if transaction.UserID == job.UserID && transaction.Type == "MONEY_IN" {
 			rewardTotal = int64(transaction.Total)
 			break
 		}
