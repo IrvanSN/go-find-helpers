@@ -69,6 +69,25 @@ func (jc *JobController) JobPaymentCallback(c echo.Context) error {
 	return nil
 }
 
+func (jc *JobController) MarkAsDone(c echo.Context) error {
+	var jobDoneRequest request.JobDoneRequest
+	if err := c.Bind(&jobDoneRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	_, errUseCase := jc.jobUseCase.MarkAsDone(jobDoneRequest.JobDoneToEntities(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	return nil
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }

@@ -2,9 +2,11 @@ package job
 
 import (
 	"errors"
+	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"github.com/irvansn/go-find-helpers/middlewares"
+	"github.com/irvansn/go-find-helpers/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -39,12 +41,14 @@ func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 func (r *Repo) Find(job *entities.Job) error {
 	jobDb := FromUseCase(job)
 
-	if err := r.DB.Preload(clause.Associations).First(&jobDb).Error; err != nil {
+	if err := r.DB.Preload("Transactions.Payment").Preload(clause.Associations).First(&jobDb).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return constant.ErrNotFound
 		}
 		return err
 	}
+
+	fmt.Println("job repo find", utils.PrettyPrint(jobDb.Transactions))
 
 	*job = *jobDb.ToUseCase()
 	return nil
@@ -91,5 +95,9 @@ func (r *Repo) PaymentCallback(job *entities.Job) error {
 	}
 
 	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) MarkAsDone(job *entities.Job, user *middlewares.Claims) error {
 	return nil
 }

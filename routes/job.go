@@ -19,4 +19,5 @@ func (r *JobRouteController) InitRoute(e *echo.Echo) {
 	j.Use(middlewares.JWTMiddleware)
 	j.POST("/post", r.JobController.Create)
 	j.POST("/take", r.JobController.Take)
+	j.POST("/done", r.JobController.MarkAsDone)
 }

@@ -157,3 +157,19 @@ func (j *JobUseCase) PaymentCallback(job *entities.Job) (entities.Job, error) {
 
 	return *job, nil
 }
+
+func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if job.ID == uuid.Nil {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	return entities.Job{}, nil
+}
