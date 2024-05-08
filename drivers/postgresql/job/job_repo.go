@@ -2,6 +2,7 @@ package job
 
 import (
 	"errors"
+	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"github.com/irvansn/go-find-helpers/middlewares"
@@ -73,6 +74,22 @@ func (r *Repo) UpdateStatus(job *entities.Job) error {
 			return constant.ErrNotFound
 		}
 		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) PaymentCallback(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Model(&jobDb.Transactions[0].Payment).Where("id = ?", jobDb.Transactions[0].Payment.ID).Update("status", jobDb.Transactions[0].Payment.Status).Error; err != nil {
+		fmt.Println("err update payment status", err)
+		return constant.ErrFailedUpdate
+	}
+
+	if err := r.DB.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", jobDb.Status).Error; err != nil {
+		return constant.ErrFailedUpdate
 	}
 
 	*job = *jobDb.ToUseCase()

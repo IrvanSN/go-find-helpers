@@ -130,3 +130,30 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	return *job, nil
 }
+
+func (j *JobUseCase) PaymentCallback(job *entities.Job) (entities.Job, error) {
+	paymentId := job.Transactions[0].Payment.ID
+	paymentStatus := job.Transactions[0].Payment.Status
+
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	job.Transactions[0].Payment.ID = paymentId
+
+	if paymentStatus == "PAID" {
+		job.Status = "OPEN"
+		job.Transactions[0].Payment.Status = "SUCCESS"
+	}
+
+	if paymentStatus == "EXPIRED" {
+		job.Status = "CLOSED"
+		job.Transactions[0].Payment.Status = "EXPIRED"
+	}
+
+	if err := j.repository.PaymentCallback(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}
