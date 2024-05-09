@@ -45,7 +45,7 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 	transaction.Type = "MONEY_OUT"
 	transaction.Payment.Status = "PENDING"
 	transaction.UserID = user.ID
-	transaction.Job = entities.Job{ID: job.ID}
+	transaction.JobID = job.ID
 	transaction.SubTotal = subTotal
 	transaction.Tax = tax
 	transaction.Total = subTotal + tax
@@ -108,7 +108,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	transaction.Type = "MONEY_IN"
 	transaction.Payment.Status = "PENDING"
 	transaction.UserID = user.ID
-	transaction.Job = entities.Job{ID: job.ID}
+	transaction.JobID = job.ID
 
 	transaction.SubTotal = job.RewardEarned
 	tax := (transaction.SubTotal / 100) * 5
@@ -168,6 +168,10 @@ func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (en
 	}
 
 	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	if err := j.repository.MarkAsDone(job); err != nil {
 		return entities.Job{}, err
 	}
 

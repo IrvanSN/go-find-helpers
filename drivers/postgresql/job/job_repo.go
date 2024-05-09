@@ -2,11 +2,10 @@ package job
 
 import (
 	"errors"
-	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
 	"github.com/irvansn/go-find-helpers/middlewares"
-	"github.com/irvansn/go-find-helpers/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -48,8 +47,6 @@ func (r *Repo) Find(job *entities.Job) error {
 		return err
 	}
 
-	fmt.Println("job repo find", utils.PrettyPrint(jobDb.Transactions))
-
 	*job = *jobDb.ToUseCase()
 	return nil
 }
@@ -62,6 +59,17 @@ func (r *Repo) AddHelper(job *entities.Job) error {
 	}
 
 	if err := r.DB.Create(&jobDb.Transactions[0].Payment).Error; err != nil {
+		return constant.ErrInsertDatabase
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Update(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Save(&jobDb).Error; err != nil {
 		return constant.ErrInsertDatabase
 	}
 
@@ -98,6 +106,44 @@ func (r *Repo) PaymentCallback(job *entities.Job) error {
 	return nil
 }
 
-func (r *Repo) MarkAsDone(job *entities.Job, user *middlewares.Claims) error {
+func (r *Repo) MarkAsDone(job *entities.Job) error {
+	jobDb := FromUseCase(job)
+
+	tx := r.DB.Begin()
+	defer func() {
+		if re := recover(); re != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for i, _transaction := range job.Transactions {
+		if _transaction.Type == "MONEY_IN" {
+			job.Transactions[i].Payment.Status = "SUCCESS"
+
+			newUser := user.User{ID: _transaction.UserID}
+			if err := tx.First(&newUser).Error; err != nil {
+				tx.Rollback()
+			}
+
+			if err := tx.Save(job.Transactions[i].Payment).Error; err != nil {
+				tx.Rollback()
+			}
+
+			newUser.CurrentBalance += _transaction.Total
+			if err := tx.Save(&newUser).Error; err != nil {
+				tx.Rollback()
+			}
+
+			if err := tx.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", "CLOSED").Error; err != nil {
+				tx.Rollback()
+			}
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		panic(err)
+	}
+
+	*job = *jobDb.ToUseCase()
 	return nil
 }

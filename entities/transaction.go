@@ -9,7 +9,7 @@ type Transaction struct {
 	ID        uuid.UUID
 	Type      string
 	UserID    uuid.UUID
-	Job       Job
+	JobID     uuid.UUID
 	SubTotal  float64
 	Tax       float64
 	Total     float64
