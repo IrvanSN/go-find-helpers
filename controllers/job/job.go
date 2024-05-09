@@ -85,8 +85,28 @@ func (jc *JobController) MarkAsDone(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	jobMarkDoneResponse := response.MarkDoneResponseFromUseCase(&job)
+	jobMarkDoneResponse := response.StatusUpdateResponseFromUseCase(&job)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job completed successfully! All rewards have been transferred to the Helper's account balances. Thank you for your contribution!", jobMarkDoneResponse))
+}
+
+func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
+	var jobOnProgressRequest request.JobOnProgressRequest
+	if err := c.Bind(&jobOnProgressRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	job, errUseCase := jc.jobUseCase.MarkAsOnProgress(jobOnProgressRequest.JobOnProgressToEntities(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobOnProgressResponse := response.StatusUpdateResponseFromUseCase(&job)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job status changed to ON_PROGRESS!", jobOnProgressResponse))
 }
 
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {

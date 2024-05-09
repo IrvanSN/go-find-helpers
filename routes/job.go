@@ -20,4 +20,5 @@ func (r *JobRouteController) InitRoute(e *echo.Echo) {
 	j.POST("/post", r.JobController.Create)
 	j.POST("/take", r.JobController.Take)
 	j.POST("/done", r.JobController.MarkAsDone)
+	j.POST("/on-progress", r.JobController.MarkAsOnProgress)
 }

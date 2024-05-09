@@ -26,6 +26,8 @@ func ConvertResponseCode(err error) int {
 		return http.StatusBadRequest
 	case errors.Is(err, constant.ErrJobStillOpened):
 		return http.StatusBadRequest
+	case errors.Is(err, constant.ErrJobAlreadyOnProgress):
+		return http.StatusBadRequest
 	case errors.Is(err, constant.ErrJobAlreadyClosed):
 		return http.StatusBadRequest
 	case errors.Is(err, constant.ErrFailedUpdate):

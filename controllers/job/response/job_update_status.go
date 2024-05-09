@@ -21,7 +21,7 @@ type JobDoneTransaction struct {
 	Payment       JobDonePayment `json:"payment"`
 }
 
-type JobMarkDoneResponse struct {
+type JobStatusUpdateResponse struct {
 	JobID        uuid.UUID            `json:"job_id"`
 	Title        string               `json:"title"`
 	Description  string               `json:"description"`
@@ -29,7 +29,7 @@ type JobMarkDoneResponse struct {
 	Transactions []JobDoneTransaction `json:"transactions"`
 }
 
-func MarkDoneResponseFromUseCase(job *entities.Job) *JobMarkDoneResponse {
+func StatusUpdateResponseFromUseCase(job *entities.Job) *JobStatusUpdateResponse {
 	transactions := make([]JobDoneTransaction, len(job.Transactions))
 	for i, transaction := range job.Transactions {
 		transactions[i] = JobDoneTransaction{
@@ -46,10 +46,11 @@ func MarkDoneResponseFromUseCase(job *entities.Job) *JobMarkDoneResponse {
 			},
 		}
 	}
-	return &JobMarkDoneResponse{
-		JobID:       job.ID,
-		Title:       job.Title,
-		Description: job.Description,
-		Status:      job.Status,
+	return &JobStatusUpdateResponse{
+		JobID:        job.ID,
+		Title:        job.Title,
+		Description:  job.Description,
+		Status:       job.Status,
+		Transactions: transactions,
 	}
 }

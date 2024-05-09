@@ -193,3 +193,37 @@ func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (en
 
 	return *job, nil
 }
+
+func (j *JobUseCase) MarkAsOnProgress(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if job.ID == uuid.Nil {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	if job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
+	}
+
+	if job.Status == "ON_PROGRESS" {
+		return entities.Job{}, constant.ErrJobAlreadyOnProgress
+	}
+
+	job.Status = "ON_PROGRESS"
+
+	if err := j.repository.UpdateStatus(job); err != nil {
+		return entities.Job{}, constant.ErrFailedUpdate
+	}
+
+	return *job, nil
+}
