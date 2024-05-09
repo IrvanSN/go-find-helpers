@@ -32,7 +32,7 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 
 	job.ID = uuid.New()
 	job.Status = "CLOSED"
-	job.User.ID = user.ID
+	job.UserID = user.ID
 
 	transaction := entities.Transaction{}
 	transaction.ID = uuid.New()
@@ -44,8 +44,8 @@ func (j *JobUseCase) Create(job *entities.Job, user *middlewares.Claims) (entiti
 
 	transaction.Type = "MONEY_OUT"
 	transaction.Payment.Status = "PENDING"
-	transaction.User = entities.User{ID: user.ID}
-	transaction.Job = entities.Job{ID: job.ID}
+	transaction.UserID = user.ID
+	transaction.JobID = job.ID
 	transaction.SubTotal = subTotal
 	transaction.Tax = tax
 	transaction.Total = subTotal + tax
@@ -66,7 +66,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, constant.ErrEmptyInput
 	}
 
-	job.User.ID = user.ID
+	job.UserID = user.ID
 
 	if user.Role != "HELPER" {
 		return entities.Job{}, constant.ErrNotAuthorized
@@ -82,7 +82,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	helperAlreadyTakeTheJob := false
 	for _, transaction := range job.Transactions {
-		if transaction.User.ID == user.ID && transaction.Type == "MONEY_IN" {
+		if transaction.UserID == user.ID && transaction.Type == "MONEY_IN" {
 			helperAlreadyTakeTheJob = true
 			break
 		}
@@ -107,8 +107,8 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	transaction.ID = uuid.New()
 	transaction.Type = "MONEY_IN"
 	transaction.Payment.Status = "PENDING"
-	transaction.User = entities.User{ID: user.ID}
-	transaction.Job = entities.Job{ID: job.ID}
+	transaction.UserID = user.ID
+	transaction.JobID = job.ID
 
 	transaction.SubTotal = job.RewardEarned
 	tax := (transaction.SubTotal / 100) * 5
@@ -121,7 +121,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 
 	var newJob entities.Job
 	newJob.ID = job.ID
-	newJob.User.ID = user.ID
+	newJob.UserID = user.ID
 	newJob.Transactions = append(newJob.Transactions, transaction)
 
 	if err := j.repository.AddHelper(&newJob); err != nil {
@@ -156,4 +156,24 @@ func (j *JobUseCase) PaymentCallback(job *entities.Job) (entities.Job, error) {
 	}
 
 	return *job, nil
+}
+
+func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if job.ID == uuid.Nil {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	if err := j.repository.MarkAsDone(job); err != nil {
+		return entities.Job{}, err
+	}
+
+	return entities.Job{}, nil
 }
