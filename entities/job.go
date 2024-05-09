@@ -38,4 +38,5 @@ type JobUseCaseInterface interface {
 	Take(job *Job, user *middlewares.Claims) (Job, error)
 	PaymentCallback(job *Job) (Job, error)
 	MarkAsDone(job *Job, user *middlewares.Claims) (Job, error)
+	MarkAsOnProgress(job *Job, user *middlewares.Claims) (Job, error)
 }
