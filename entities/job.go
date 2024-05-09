@@ -16,7 +16,7 @@ type Job struct {
 	Status         string
 	HelperRequired uint
 	Category       Category
-	User           User
+	UserID         uuid.UUID
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Transactions   []Transaction
@@ -27,12 +27,15 @@ type JobRepositoryInterface interface {
 	Create(Job *Job, user *middlewares.Claims) error
 	Find(job *Job) error
 	AddHelper(job *Job) error
+	Update(job *Job) error
 	UpdateStatus(job *Job) error
 	PaymentCallback(job *Job) error
+	MarkAsDone(job *Job) error
 }
 
 type JobUseCaseInterface interface {
 	Create(job *Job, user *middlewares.Claims) (Job, error)
 	Take(job *Job, user *middlewares.Claims) (Job, error)
 	PaymentCallback(job *Job) (Job, error)
+	MarkAsDone(job *Job, user *middlewares.Claims) (Job, error)
 }
