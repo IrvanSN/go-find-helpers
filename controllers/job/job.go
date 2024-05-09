@@ -41,17 +41,17 @@ func (jc *JobController) Take(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	var jobTake request.JobTakeRequest
+	var jobTake request.JobIdRequest
 	if err := c.Bind(&jobTake); err != nil {
 		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 	}
 
-	job, errUseCase := jc.jobUseCase.Take(jobTake.JobTakeToEntities(), userData)
+	job, errUseCase := jc.jobUseCase.Take(jobTake.JobIdToEntities(), userData)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	jobTakeResponse := response.TakeResponseFromUseCase(&job)
+	jobTakeResponse := response.TakeResponseFromUseCase(&job, userData.ID)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success take a Job, please complete the job to get the reward!", jobTakeResponse))
 }
 
@@ -70,7 +70,7 @@ func (jc *JobController) JobPaymentCallback(c echo.Context) error {
 }
 
 func (jc *JobController) MarkAsDone(c echo.Context) error {
-	var jobDoneRequest request.JobDoneRequest
+	var jobDoneRequest request.JobIdRequest
 	if err := c.Bind(&jobDoneRequest); err != nil {
 		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 	}
@@ -80,17 +80,17 @@ func (jc *JobController) MarkAsDone(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	job, errUseCase := jc.jobUseCase.MarkAsDone(jobDoneRequest.JobDoneToEntities(), userData)
+	job, errUseCase := jc.jobUseCase.MarkAsDone(jobDoneRequest.JobIdToEntities(), userData)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
 	jobMarkDoneResponse := response.StatusUpdateResponseFromUseCase(&job)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job completed successfully! All rewards have been transferred to the Helper's account balances. Thank you for your contribution!", jobMarkDoneResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job completed! All rewards have been credited to the Helpers' account balances. If any Helper slots remain unfulfilled, the corresponding rewards will be refunded to your balance. We appreciate your valuable contribution!", jobMarkDoneResponse))
 }
 
 func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
-	var jobOnProgressRequest request.JobOnProgressRequest
+	var jobOnProgressRequest request.JobIdRequest
 	if err := c.Bind(&jobOnProgressRequest); err != nil {
 		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 	}
@@ -100,7 +100,7 @@ func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	job, errUseCase := jc.jobUseCase.MarkAsOnProgress(jobOnProgressRequest.JobOnProgressToEntities(), userData)
+	job, errUseCase := jc.jobUseCase.MarkAsOnProgress(jobOnProgressRequest.JobIdToEntities(), userData)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
