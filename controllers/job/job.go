@@ -80,12 +80,13 @@ func (jc *JobController) MarkAsDone(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	_, errUseCase := jc.jobUseCase.MarkAsDone(jobDoneRequest.JobDoneToEntities(), userData)
+	job, errUseCase := jc.jobUseCase.MarkAsDone(jobDoneRequest.JobDoneToEntities(), userData)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	return nil
+	jobMarkDoneResponse := response.MarkDoneResponseFromUseCase(&job)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job completed successfully! All rewards have been transferred to the Helper's account balances. Thank you for your contribution!", jobMarkDoneResponse))
 }
 
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {

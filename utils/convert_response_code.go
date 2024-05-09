@@ -20,14 +20,18 @@ func ConvertResponseCode(err error) int {
 		return http.StatusUnauthorized
 	case errors.Is(err, constant.ErrNotAuthorized):
 		return http.StatusUnauthorized
-	case errors.Is(err, constant.ErrJobNotOpened):
-		return http.StatusForbidden
 	case errors.Is(err, constant.ErrJobAlreadyFull):
 		return http.StatusForbidden
+	case errors.Is(err, constant.ErrJobAlreadyDone):
+		return http.StatusBadRequest
+	case errors.Is(err, constant.ErrJobStillOpened):
+		return http.StatusBadRequest
+	case errors.Is(err, constant.ErrJobAlreadyClosed):
+		return http.StatusBadRequest
 	case errors.Is(err, constant.ErrFailedUpdate):
 		return http.StatusInternalServerError
 	case errors.Is(err, constant.ErrHelperAlreadyTakeTheJob):
-		return http.StatusForbidden
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

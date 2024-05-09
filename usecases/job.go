@@ -76,8 +76,12 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, err
 	}
 
-	if job.Status != "OPEN" {
-		return entities.Job{}, constant.ErrJobNotOpened
+	if job.Status == "ON_PROGRESS" || job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
 	}
 
 	helperAlreadyTakeTheJob := false
@@ -97,7 +101,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	}
 
 	if (int(job.HelperRequired) + 1) == (len(job.Transactions) + 1) {
-		job.Status = "CLOSED"
+		job.Status = "ON_PROGRESS"
 		if err := j.repository.UpdateStatus(job); err != nil {
 			return entities.Job{}, constant.ErrFailedUpdate
 		}
@@ -171,9 +175,21 @@ func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (en
 		return entities.Job{}, err
 	}
 
+	if job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
+	}
+
+	if job.Status == "OPEN" {
+		return entities.Job{}, constant.ErrJobStillOpened
+	}
+
 	if err := j.repository.MarkAsDone(job); err != nil {
 		return entities.Job{}, err
 	}
 
-	return entities.Job{}, nil
+	return *job, nil
 }
