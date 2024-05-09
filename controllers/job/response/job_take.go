@@ -1,6 +1,9 @@
 package response
 
-import "github.com/irvansn/go-find-helpers/entities"
+import (
+	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/entities"
+)
 
 type JobTakeResponse struct {
 	JobId       string `json:"job_id"`
@@ -9,10 +12,11 @@ type JobTakeResponse struct {
 	Reward      int64  `json:"reward"`
 }
 
-func TakeResponseFromUseCase(job *entities.Job) *JobTakeResponse {
+func TakeResponseFromUseCase(job *entities.Job, helperId uuid.UUID) *JobTakeResponse {
 	var rewardTotal int64
+
 	for _, transaction := range job.Transactions {
-		if transaction.UserID == job.UserID && transaction.Type == "MONEY_IN" {
+		if transaction.UserID == helperId && transaction.Type == "MONEY_IN" {
 			rewardTotal = int64(transaction.Total)
 			break
 		}

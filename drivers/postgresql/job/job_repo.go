@@ -37,6 +37,20 @@ func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 	return nil
 }
 
+func (r *Repo) FindRelated(job *entities.Job, user *middlewares.Claims) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Preload("Transactions.Payment").Preload(clause.Associations).Where("user_id = ?", user.ID).First(&jobDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
 func (r *Repo) Find(job *entities.Job) error {
 	jobDb := FromUseCase(job)
 
@@ -116,12 +130,23 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 		}
 	}()
 
+	// if unfilled helper slot refund to the CUSTOMER balance
+	unfilledHelperSlot := int(jobDb.HelperRequired) - (len(jobDb.Transactions) - 1)
+	customerUser := user.User{ID: jobDb.UserID}
+	if err := tx.First(&customerUser).Error; err != nil {
+		tx.Rollback()
+	}
+	customerUser.CurrentBalance += jobDb.RewardEarned * float64(unfilledHelperSlot)
+	if err := tx.Save(&customerUser).Error; err != nil {
+		tx.Rollback()
+	}
+
 	for i, _transaction := range job.Transactions {
 		if _transaction.Type == "MONEY_IN" {
 			job.Transactions[i].Payment.Status = "SUCCESS"
 
-			newUser := user.User{ID: _transaction.UserID}
-			if err := tx.First(&newUser).Error; err != nil {
+			helperUser := user.User{ID: _transaction.UserID}
+			if err := tx.First(&helperUser).Error; err != nil {
 				tx.Rollback()
 			}
 
@@ -129,8 +154,8 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 				tx.Rollback()
 			}
 
-			newUser.CurrentBalance += _transaction.Total
-			if err := tx.Save(&newUser).Error; err != nil {
+			helperUser.CurrentBalance += _transaction.Total
+			if err := tx.Save(&helperUser).Error; err != nil {
 				tx.Rollback()
 			}
 

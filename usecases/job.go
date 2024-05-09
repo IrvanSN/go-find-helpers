@@ -132,6 +132,8 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, err
 	}
 
+	job.Transactions = append(job.Transactions, transaction)
+
 	return *job, nil
 }
 
@@ -171,7 +173,7 @@ func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (en
 		return entities.Job{}, constant.ErrEmptyInput
 	}
 
-	if err := j.repository.Find(job); err != nil {
+	if err := j.repository.FindRelated(job, user); err != nil {
 		return entities.Job{}, err
 	}
 
@@ -203,7 +205,7 @@ func (j *JobUseCase) MarkAsOnProgress(job *entities.Job, user *middlewares.Claim
 		return entities.Job{}, constant.ErrEmptyInput
 	}
 
-	if err := j.repository.Find(job); err != nil {
+	if err := j.repository.FindRelated(job, user); err != nil {
 		return entities.Job{}, err
 	}
 

@@ -25,6 +25,7 @@ type Job struct {
 
 type JobRepositoryInterface interface {
 	Create(Job *Job, user *middlewares.Claims) error
+	FindRelated(job *Job, user *middlewares.Claims) error
 	Find(job *Job) error
 	AddHelper(job *Job) error
 	Update(job *Job) error
