@@ -134,7 +134,7 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 				tx.Rollback()
 			}
 
-			if err := tx.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", "CLOSED").Error; err != nil {
+			if err := tx.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", "DONE").Error; err != nil {
 				tx.Rollback()
 			}
 		}
