@@ -51,6 +51,31 @@ func (r *Repo) FindRelated(job *entities.Job, user *middlewares.Claims) error {
 	return nil
 }
 
+func (r *Repo) GetAll(jobs *[]entities.Job, user *middlewares.Claims, status string) error {
+	var jobsDb []Job
+
+	query := r.DB.Preload("Transactions.Payment").Preload(clause.Associations)
+	if user.Role == "CUSTOMER" {
+		query = query.Where("user_id = ?", user.ID)
+	}
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Find(&jobsDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	for _, job := range jobsDb {
+		*jobs = append(*jobs, *job.ToUseCase())
+	}
+	return nil
+}
+
 func (r *Repo) Find(job *entities.Job) error {
 	jobDb := FromUseCase(job)
 

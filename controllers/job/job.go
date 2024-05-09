@@ -109,6 +109,24 @@ func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job status changed to ON_PROGRESS!", jobOnProgressResponse))
 }
 
+func (jc *JobController) GetAllJobs(c echo.Context) error {
+	var jobGetAllRequest []entities.Job
+	statusFilter := c.QueryParam("status")
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	jobs, errUseCase := jc.jobUseCase.GetAll(&jobGetAllRequest, userData, statusFilter)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobGetAllResponse := response.GetAllResponseFromUseCase(&jobs)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get all Jobs data!", jobGetAllResponse))
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }
