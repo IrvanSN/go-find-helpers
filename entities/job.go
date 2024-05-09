@@ -32,6 +32,7 @@ type JobRepositoryInterface interface {
 	UpdateStatus(job *Job) error
 	PaymentCallback(job *Job) error
 	MarkAsDone(job *Job) error
+	GetAll(job *[]Job, user *middlewares.Claims, status string) error
 }
 
 type JobUseCaseInterface interface {
@@ -40,4 +41,5 @@ type JobUseCaseInterface interface {
 	PaymentCallback(job *Job) (Job, error)
 	MarkAsDone(job *Job, user *middlewares.Claims) (Job, error)
 	MarkAsOnProgress(job *Job, user *middlewares.Claims) (Job, error)
+	GetAll(job *[]Job, user *middlewares.Claims, status string) ([]Job, error)
 }

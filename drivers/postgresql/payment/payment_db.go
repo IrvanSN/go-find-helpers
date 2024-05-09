@@ -3,6 +3,7 @@ package payment
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/constant"
 	"net/http"
@@ -62,6 +63,7 @@ func (p *Payment) Create(email string) error {
 	}
 	defer res.Body.Close()
 
+	fmt.Println("response Status:", res.Status)
 	if res.Status != "200 OK" {
 		return constant.ErrPaymentGateway
 	}
