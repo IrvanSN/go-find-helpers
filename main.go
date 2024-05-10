@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/irvansn/go-find-helpers/config"
+	addressController "github.com/irvansn/go-find-helpers/controllers/address"
 	categoryController "github.com/irvansn/go-find-helpers/controllers/category"
 	jobController "github.com/irvansn/go-find-helpers/controllers/job"
 	userController "github.com/irvansn/go-find-helpers/controllers/user"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
@@ -35,6 +37,10 @@ func main() {
 	jobUseCase := usecases.NewJobUseCase(jobRepo)
 	newJobController := jobController.NewJobController(jobUseCase)
 
+	addressRepo := address.NewAddressRepo(db)
+	addressUseCase := usecases.NewAddressUseCase(addressRepo)
+	newAddressController := addressController.NewAddressController(addressUseCase)
+
 	userRouteController := routes.UserRouteController{
 		UserController: newUserController,
 	}
@@ -44,10 +50,14 @@ func main() {
 	jobRouteController := routes.JobRouteController{
 		JobController: newJobController,
 	}
+	addressRouteController := routes.AddressRouteController{
+		AddressController: newAddressController,
+	}
 
 	userRouteController.InitRoute(e)
 	categoryRouteController.InitRoute(e)
 	jobRouteController.InitRoute(e)
+	addressRouteController.InitRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
