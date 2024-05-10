@@ -108,8 +108,10 @@ func (r *Repo) AddHelper(job *entities.Job) error {
 func (r *Repo) Update(job *entities.Job) error {
 	jobDb := FromUseCase(job)
 
-	if err := r.DB.Save(&jobDb).Error; err != nil {
-		return constant.ErrInsertDatabase
+	if err := r.DB.Model(&jobDb).Updates(&jobDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
 	}
 
 	*job = *jobDb.ToUseCase()

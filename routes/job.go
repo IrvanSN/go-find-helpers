@@ -23,4 +23,5 @@ func (r *JobRouteController) InitRoute(e *echo.Echo) {
 	j.POST("/on-progress", r.JobController.MarkAsOnProgress)
 
 	j.GET("", r.JobController.GetAllJobs)
+	j.PUT("/:id", r.JobController.Update)
 }

@@ -28,11 +28,11 @@ type JobRepositoryInterface interface {
 	FindRelated(job *Job, user *middlewares.Claims) error
 	Find(job *Job) error
 	AddHelper(job *Job) error
-	Update(job *Job) error
 	UpdateStatus(job *Job) error
 	PaymentCallback(job *Job) error
 	MarkAsDone(job *Job) error
 	GetAll(job *[]Job, user *middlewares.Claims, status string) error
+	Update(job *Job) error
 }
 
 type JobUseCaseInterface interface {
@@ -42,4 +42,5 @@ type JobUseCaseInterface interface {
 	MarkAsDone(job *Job, user *middlewares.Claims) (Job, error)
 	MarkAsOnProgress(job *Job, user *middlewares.Claims) (Job, error)
 	GetAll(job *[]Job, user *middlewares.Claims, status string) ([]Job, error)
+	Update(job *Job, user *middlewares.Claims) (Job, error)
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/controllers/base"
 	"github.com/irvansn/go-find-helpers/controllers/job/request"
 	"github.com/irvansn/go-find-helpers/controllers/job/response"
@@ -85,7 +86,7 @@ func (jc *JobController) MarkAsDone(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	jobMarkDoneResponse := response.StatusUpdateResponseFromUseCase(&job)
+	jobMarkDoneResponse := response.DetailResponseFromUseCase(&job)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job completed! All rewards have been credited to the Helpers' account balances. If any Helper slots remain unfulfilled, the corresponding rewards will be refunded to your balance. We appreciate your valuable contribution!", jobMarkDoneResponse))
 }
 
@@ -105,7 +106,7 @@ func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	jobOnProgressResponse := response.StatusUpdateResponseFromUseCase(&job)
+	jobOnProgressResponse := response.DetailResponseFromUseCase(&job)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Job status changed to ON_PROGRESS!", jobOnProgressResponse))
 }
 
@@ -125,6 +126,32 @@ func (jc *JobController) GetAllJobs(c echo.Context) error {
 
 	jobGetAllResponse := response.GetAllResponseFromUseCase(&jobs)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get all Jobs data!", jobGetAllResponse))
+}
+
+func (jc *JobController) Update(c echo.Context) error {
+	var jobUpdateRequest request.JobUpdateRequest
+	if err := c.Bind(&jobUpdateRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	jobId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+	jobUpdateRequest.ID = jobId
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	job, errUseCase := jc.jobUseCase.Update(jobUpdateRequest.UpdateFromUseCase(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobDetailResponse := response.DetailResponseFromUseCase(&job)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success update Job data!", jobDetailResponse))
 }
 
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
