@@ -154,6 +154,29 @@ func (jc *JobController) Update(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success update Job data!", jobDetailResponse))
 }
 
+func (jc *JobController) Delete(c echo.Context) error {
+	var deleteRequest entities.Job
+
+	jobId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+	deleteRequest.ID = jobId
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	job, errUseCase := jc.jobUseCase.Delete(&deleteRequest, userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobDetailResponse := response.DetailResponseFromUseCase(&job)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success delete Job data!", jobDetailResponse))
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }

@@ -105,13 +105,28 @@ func (r *Repo) AddHelper(job *entities.Job) error {
 	return nil
 }
 
-func (r *Repo) Update(job *entities.Job) error {
+func (r *Repo) Update(job *entities.Job, user *middlewares.Claims) error {
 	jobDb := FromUseCase(job)
 
-	if err := r.DB.Model(&jobDb).Updates(&jobDb).Error; err != nil {
+	if err := r.DB.Model(&jobDb).Where("id = ? AND user_id = ?", job.ID, user.ID).Updates(&jobDb).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return constant.ErrNotFound
 		}
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Delete(job *entities.Job, user *middlewares.Claims) error {
+	jobDb := FromUseCase(job)
+
+	db := r.DB.Where("id = ? AND user_id = ?", job.ID, user.ID).Delete(&jobDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
+		return err
 	}
 
 	*job = *jobDb.ToUseCase()
