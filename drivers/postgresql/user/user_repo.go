@@ -6,6 +6,7 @@ import (
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repo struct {
@@ -62,6 +63,35 @@ func (r *Repo) GetAllAddresses(user *entities.User) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return constant.ErrNotFound
 		}
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Find(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	if err := r.DB.Preload(clause.Associations).First(&userDb, userDb.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Update(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	db := r.DB.Where("id = ?", userDb.ID).Updates(&userDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
 		return err
 	}
 

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	jwt2 "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/controllers/base"
 	"github.com/irvansn/go-find-helpers/controllers/user/request"
 	"github.com/irvansn/go-find-helpers/controllers/user/response"
@@ -117,6 +118,55 @@ func (uc *UserController) GetAllAddresses(c echo.Context) error {
 
 	userResponse := response.AllAddressesResponseFromUseCase(&user)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get all addresses!", userResponse))
+}
+
+func (uc *UserController) Update(c echo.Context) error {
+	var updateRequest request.UserDetailRequest
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	updateRequest.ID = userId
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	user, errUseCase := uc.userUseCase.Update(updateRequest.ToEntities(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	updateResponse := response.UserDetailResponseFromUseCase(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully update user!", updateResponse))
+}
+
+func (uc *UserController) Find(c echo.Context) error {
+	var updateRequest entities.User
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	updateRequest.ID = userId
+
+	user, errUseCase := uc.userUseCase.Find(&updateRequest)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	updateResponse := response.UserDetailResponseFromUseCase(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully get user!", updateResponse))
 }
 
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {

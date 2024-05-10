@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -81,6 +82,38 @@ func (u *UserUseCase) AddAddress(user *entities.User, userId uuid.UUID) (entitie
 
 func (u *UserUseCase) GetAllAddresses(user *entities.User) (entities.User, error) {
 	if err := u.repository.GetAllAddresses(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) Find(user *entities.User) (entities.User, error) {
+	if user.ID == uuid.Nil {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	if err := u.repository.Find(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) Update(user *entities.User, userRequest *middlewares.Claims) (entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if user.ID == uuid.Nil {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	if err := u.repository.Update(user); err != nil {
+		return entities.User{}, err
+	}
+
+	if err := u.repository.Find(user); err != nil {
 		return entities.User{}, err
 	}
 

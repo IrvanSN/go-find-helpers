@@ -18,4 +18,6 @@ func (r *UserRouteController) InitRoute(e *echo.Echo) {
 	u.Use(middlewares.JWTMiddleware)
 	u.POST("/addresses", r.UserController.AddAddress)
 	u.GET("/addresses", r.UserController.GetAllAddresses)
+	u.PUT("/:id", r.UserController.Update)
+	u.GET("/:id", r.UserController.Find)
 }

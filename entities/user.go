@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"time"
 )
 
@@ -27,11 +28,15 @@ type UserRepositoryInterface interface {
 	SignIn(user *User) error
 	AddAddress(user *User) error
 	GetAllAddresses(user *User) error
+	Find(user *User) error
+	Update(user *User) error
 }
 
 type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
 	AddAddress(user *User, userId uuid.UUID) (User, error)
+	Find(user *User) (User, error)
 	GetAllAddresses(user *User) (User, error)
+	Update(user *User, userRequest *middlewares.Claims) (User, error)
 }
