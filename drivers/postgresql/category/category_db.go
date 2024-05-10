@@ -3,11 +3,13 @@ package category
 import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/entities"
+	"gorm.io/gorm"
 )
 
 type Category struct {
 	ID   uuid.UUID `gorm:"type:varchar(100);"`
 	Name string    `gorm:"type:varchar(100);not null"`
+	gorm.DeletedAt
 }
 
 func FromUseCase(category *entities.Category) *Category {

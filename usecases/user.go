@@ -22,20 +22,24 @@ func (u *UserUseCase) SignUp(user *entities.User) (entities.User, error) {
 		return entities.User{}, constant.ErrEmptyInput
 	}
 
-	user.ID = uuid.New()
-	user.Auth.ID = uuid.New()
+	if user.Role == "CUSTOMER" || user.Role == "HELPER" {
+		user.ID = uuid.New()
+		user.Auth.ID = uuid.New()
 
-	hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(user.Auth.PasswordHash), bcrypt.DefaultCost)
-	if errHash != nil {
+		hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(user.Auth.PasswordHash), bcrypt.DefaultCost)
+		if errHash != nil {
+			return entities.User{}, constant.ErrInvalidRequest
+		}
+		user.Auth.PasswordHash = string(hashedPassword)
+
+		if err := u.repository.SignUp(user); err != nil {
+			return entities.User{}, err
+		}
+
+		return *user, nil
+	} else {
 		return entities.User{}, constant.ErrInvalidRequest
 	}
-	user.Auth.PasswordHash = string(hashedPassword)
-
-	if err := u.repository.SignUp(user); err != nil {
-		return entities.User{}, err
-	}
-
-	return *user, nil
 }
 
 func (u *UserUseCase) SignIn(user *entities.User) (entities.User, error) {
@@ -43,17 +47,21 @@ func (u *UserUseCase) SignIn(user *entities.User) (entities.User, error) {
 		return entities.User{}, constant.ErrEmptyInput
 	}
 
-	password := user.Auth.PasswordHash
+	if user.Role == "CUSTOMER" || user.Role == "HELPER" || user.Role == "ADMIN" {
+		password := user.Auth.PasswordHash
 
-	if err := u.repository.SignIn(user); err != nil {
-		return entities.User{}, err
+		if err := u.repository.SignIn(user); err != nil {
+			return entities.User{}, err
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Auth.PasswordHash), []byte(password)); err != nil {
+			return entities.User{}, constant.ErrInvalidEmailOrPassword
+		}
+
+		return *user, nil
+	} else {
+		return entities.User{}, constant.ErrInvalidRequest
 	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Auth.PasswordHash), []byte(password)); err != nil {
-		return entities.User{}, constant.ErrInvalidEmailOrPassword
-	}
-
-	return *user, nil
 }
 
 func (u *UserUseCase) AddAddress(user *entities.User, userId uuid.UUID) (entities.User, error) {

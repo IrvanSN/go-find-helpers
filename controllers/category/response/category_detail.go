@@ -5,13 +5,13 @@ import (
 	"github.com/irvansn/go-find-helpers/entities"
 )
 
-type CategoryResponse struct {
+type CategoryDetailResponse struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 }
 
-func FromUseCase(category *entities.Category) *CategoryResponse {
-	return &CategoryResponse{
+func FromUseCase(category *entities.Category) *CategoryDetailResponse {
+	return &CategoryDetailResponse{
 		ID:   category.ID,
 		Name: category.Name,
 	}
