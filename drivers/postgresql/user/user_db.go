@@ -5,6 +5,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
 	"github.com/irvansn/go-find-helpers/entities"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type User struct {
 	CreatedAt      time.Time         `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time         `gorm:"autoUpdateTime"`
 	Addresses      []address.Address `gorm:"many2many:user_addresses;"`
+	gorm.DeletedAt
 }
 
 func FromUseCase(user *entities.User) *User {

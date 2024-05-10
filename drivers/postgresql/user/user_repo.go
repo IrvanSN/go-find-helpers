@@ -98,3 +98,18 @@ func (r *Repo) Update(user *entities.User) error {
 	*user = *userDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) Delete(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	db := r.DB.Where("id = ?", userDb.ID).Delete(&userDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}

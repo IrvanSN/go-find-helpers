@@ -148,8 +148,8 @@ func (uc *UserController) Update(c echo.Context) error {
 }
 
 func (uc *UserController) Find(c echo.Context) error {
-	var updateRequest entities.User
-	if err := c.Bind(&updateRequest); err != nil {
+	var getRequest entities.User
+	if err := c.Bind(&getRequest); err != nil {
 		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 	}
 
@@ -158,15 +158,42 @@ func (uc *UserController) Find(c echo.Context) error {
 		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 	}
 
-	updateRequest.ID = userId
+	getRequest.ID = userId
 
-	user, errUseCase := uc.userUseCase.Find(&updateRequest)
+	user, errUseCase := uc.userUseCase.Find(&getRequest)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
 
-	updateResponse := response.UserDetailResponseFromUseCase(&user)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully get user!", updateResponse))
+	findResponse := response.UserDetailResponseFromUseCase(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully get user!", findResponse))
+}
+
+func (uc *UserController) Delete(c echo.Context) error {
+	var deleteRequest entities.User
+	if err := c.Bind(&deleteRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	userId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	deleteRequest.ID = userId
+
+	user, errUseCase := uc.userUseCase.Delete(&deleteRequest, userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	deleteResponse := response.UserDetailResponseFromUseCase(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", deleteResponse))
 }
 
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {

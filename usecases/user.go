@@ -119,3 +119,19 @@ func (u *UserUseCase) Update(user *entities.User, userRequest *middlewares.Claim
 
 	return *user, nil
 }
+
+func (u *UserUseCase) Delete(user *entities.User, userRequest *middlewares.Claims) (entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if user.ID == uuid.Nil {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	if err := u.repository.Delete(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
