@@ -73,7 +73,7 @@ func (r *Repo) GetAllAddresses(user *entities.User) error {
 func (r *Repo) Find(user *entities.User) error {
 	userDb := FromUseCase(user)
 
-	if err := r.DB.Preload(clause.Associations).First(&userDb, userDb.ID).Error; err != nil {
+	if err := r.DB.Omit("DeletedAt").Preload(clause.Associations).First(&userDb, userDb.ID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return constant.ErrNotFound
 		}
@@ -114,7 +114,7 @@ func (r *Repo) Delete(user *entities.User) error {
 	return nil
 }
 
-func (r *Repo) GetAll(user *[]entities.User) error {
+func (r *Repo) GetAll(users *[]entities.User) error {
 	var userDb []User
 
 	if err := r.DB.Preload("Auth").Find(&userDb).Error; err != nil {
@@ -122,7 +122,18 @@ func (r *Repo) GetAll(user *[]entities.User) error {
 	}
 
 	for _, _user := range userDb {
-		*user = append(*user, *_user.ToUseCase())
+		*users = append(*users, *_user.ToUseCase())
 	}
+	return nil
+}
+
+func (r *Repo) GetAllTransactions(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	if err := r.DB.Omit("DeletedAt").Preload("Transactions.Payment").Preload(clause.Associations).First(&userDb).Error; err != nil {
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
 	return nil
 }

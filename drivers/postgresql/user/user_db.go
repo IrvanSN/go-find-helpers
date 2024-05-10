@@ -4,6 +4,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/auth"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/payment"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
 	"time"
@@ -21,7 +23,8 @@ type User struct {
 	CreatedAt      time.Time         `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time         `gorm:"autoUpdateTime"`
 	Addresses      []address.Address `gorm:"many2many:user_addresses;"`
-	gorm.DeletedAt
+	Transactions   []transaction.Transaction
+	DeletedAt      gorm.DeletedAt
 }
 
 func FromUseCase(user *entities.User) *User {
@@ -40,6 +43,28 @@ func FromUseCase(user *entities.User) *User {
 			UpdatedAt: _address.UpdatedAt,
 		}
 	}
+
+	transactions := make([]transaction.Transaction, len(user.Transactions))
+	for i, _transaction := range user.Transactions {
+		transactions[i] = transaction.Transaction{
+			ID:       _transaction.ID,
+			Type:     _transaction.Type,
+			UserID:   _transaction.UserID,
+			JobID:    _transaction.JobID,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
+			Payment: payment.Payment{
+				ID:         _transaction.Payment.ID,
+				Amount:     _transaction.Payment.Amount,
+				Status:     _transaction.Payment.Status,
+				InvoiceURL: _transaction.Payment.InvoiceURL,
+			},
+			CreatedAt: _transaction.CreatedAt,
+			UpdatedAt: _transaction.UpdatedAt,
+		}
+	}
+
 	return &User{
 		ID:             user.ID,
 		FirstName:      user.FirstName,
@@ -53,10 +78,11 @@ func FromUseCase(user *entities.User) *User {
 			Email:        user.Auth.Email,
 			PasswordHash: user.Auth.PasswordHash,
 		},
-		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Addresses: addresses,
+		Transactions: transactions,
+		Role:         user.Role,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+		Addresses:    addresses,
 	}
 }
 
@@ -76,6 +102,27 @@ func (u *User) ToUseCase() *entities.User {
 			UpdatedAt: _address.UpdatedAt,
 		}
 	}
+
+	transactions := make([]entities.Transaction, len(u.Transactions))
+	for i, _transaction := range u.Transactions {
+		transactions[i] = entities.Transaction{
+			ID:       _transaction.ID,
+			Type:     _transaction.Type,
+			UserID:   _transaction.UserID,
+			JobID:    _transaction.JobID,
+			SubTotal: _transaction.SubTotal,
+			Tax:      _transaction.Tax,
+			Total:    _transaction.Total,
+			Payment: entities.Payment{
+				ID:         _transaction.Payment.ID,
+				Amount:     _transaction.Payment.Amount,
+				Status:     _transaction.Payment.Status,
+				InvoiceURL: _transaction.Payment.InvoiceURL,
+			},
+			CreatedAt: _transaction.CreatedAt,
+			UpdatedAt: _transaction.UpdatedAt,
+		}
+	}
 	return &entities.User{
 		ID:             u.ID,
 		FirstName:      u.FirstName,
@@ -89,8 +136,9 @@ func (u *User) ToUseCase() *entities.User {
 			Email:        u.Auth.Email,
 			PasswordHash: u.Auth.PasswordHash,
 		},
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
-		Addresses: addresses,
+		Transactions: transactions,
+		CreatedAt:    u.CreatedAt,
+		UpdatedAt:    u.UpdatedAt,
+		Addresses:    addresses,
 	}
 }

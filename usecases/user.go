@@ -147,3 +147,11 @@ func (u *UserUseCase) GetAll(user *[]entities.User, userRequest *middlewares.Cla
 
 	return *user, nil
 }
+
+func (u *UserUseCase) GetAllTransactions(user *entities.User) (entities.User, error) {
+	if err := u.repository.GetAllTransactions(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}

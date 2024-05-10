@@ -149,9 +149,6 @@ func (uc *UserController) Update(c echo.Context) error {
 
 func (uc *UserController) Find(c echo.Context) error {
 	var getRequest entities.User
-	if err := c.Bind(&getRequest); err != nil {
-		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
-	}
 
 	userId, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -206,7 +203,7 @@ func (uc *UserController) GetAll(c echo.Context) error {
 	if !ok {
 		return echo.ErrInternalServerError
 	}
-	
+
 	users, errUseCase := uc.userUseCase.GetAll(&getAllRequest, userData)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
@@ -214,6 +211,28 @@ func (uc *UserController) GetAll(c echo.Context) error {
 
 	getAllResponse := response.SliceFromUseCase(&users)
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", getAllResponse))
+}
+
+func (uc *UserController) GetAllTransactions(c echo.Context) error {
+	var getAllTransactionsRequest entities.User
+	if err := c.Bind(&getAllTransactionsRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	getAllTransactionsRequest.ID = userData.ID
+
+	user, errUseCase := uc.userUseCase.GetAllTransactions(&getAllTransactionsRequest)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	getAllTransactionsResponse := response.GetAllTransactions(&user)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", getAllTransactionsResponse))
 }
 
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {

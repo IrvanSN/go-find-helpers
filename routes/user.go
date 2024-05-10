@@ -22,4 +22,5 @@ func (r *UserRouteController) InitRoute(e *echo.Echo) {
 	u.GET("/:id", r.UserController.Find)
 	u.DELETE("/:id", r.UserController.Delete)
 	u.GET("", r.UserController.GetAll)
+	u.GET("/transactions", r.UserController.GetAllTransactions)
 }

@@ -18,7 +18,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Jobs           []Job
-	Rewards        []Transaction
+	Transactions   []Transaction
 	Ratings        []Rating
 	Addresses      []Address
 }
@@ -32,6 +32,7 @@ type UserRepositoryInterface interface {
 	Update(user *User) error
 	Delete(user *User) error
 	GetAll(user *[]User) error
+	GetAllTransactions(user *User) error
 }
 
 type UserUseCaseInterface interface {
@@ -43,4 +44,5 @@ type UserUseCaseInterface interface {
 	Update(user *User, userRequest *middlewares.Claims) (User, error)
 	Delete(user *User, userRequest *middlewares.Claims) (User, error)
 	GetAll(user *[]User, userRequest *middlewares.Claims) ([]User, error)
+	GetAllTransactions(user *User) (User, error)
 }
