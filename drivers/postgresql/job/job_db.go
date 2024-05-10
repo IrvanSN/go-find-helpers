@@ -9,6 +9,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -31,6 +32,7 @@ type Job struct {
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Transactions   []transaction.Transaction
 	Thumbnails     []thumbnail.Thumbnail
+	gorm.DeletedAt
 }
 
 func FromUseCase(job *entities.Job) *Job {

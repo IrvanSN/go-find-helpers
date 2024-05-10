@@ -251,11 +251,23 @@ func (j *JobUseCase) Update(job *entities.Job, user *middlewares.Claims) (entiti
 		return entities.Job{}, constant.ErrNotAuthorized
 	}
 
-	if err := j.repository.Update(job); err != nil {
+	if err := j.repository.Update(job, user); err != nil {
 		return entities.Job{}, err
 	}
 
 	if err := j.repository.FindRelated(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}
+
+func (j *JobUseCase) Delete(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if err := j.repository.Delete(job, user); err != nil {
 		return entities.Job{}, err
 	}
 
