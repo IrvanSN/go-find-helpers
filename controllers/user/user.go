@@ -196,6 +196,26 @@ func (uc *UserController) Delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", deleteResponse))
 }
 
+func (uc *UserController) GetAll(c echo.Context) error {
+	var getAllRequest []entities.User
+	if err := c.Bind(&getAllRequest); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+	
+	users, errUseCase := uc.userUseCase.GetAll(&getAllRequest, userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	getAllResponse := response.SliceFromUseCase(&users)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", getAllResponse))
+}
+
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {
 	return &UserController{
 		userUseCase: userUseCase,

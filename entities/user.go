@@ -31,6 +31,7 @@ type UserRepositoryInterface interface {
 	Find(user *User) error
 	Update(user *User) error
 	Delete(user *User) error
+	GetAll(user *[]User) error
 }
 
 type UserUseCaseInterface interface {
@@ -41,4 +42,5 @@ type UserUseCaseInterface interface {
 	GetAllAddresses(user *User) (User, error)
 	Update(user *User, userRequest *middlewares.Claims) (User, error)
 	Delete(user *User, userRequest *middlewares.Claims) (User, error)
+	GetAll(user *[]User, userRequest *middlewares.Claims) ([]User, error)
 }

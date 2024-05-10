@@ -21,4 +21,5 @@ func (r *UserRouteController) InitRoute(e *echo.Echo) {
 	u.PUT("/:id", r.UserController.Update)
 	u.GET("/:id", r.UserController.Find)
 	u.DELETE("/:id", r.UserController.Delete)
+	u.GET("", r.UserController.GetAll)
 }

@@ -135,3 +135,15 @@ func (u *UserUseCase) Delete(user *entities.User, userRequest *middlewares.Claim
 
 	return *user, nil
 }
+
+func (u *UserUseCase) GetAll(user *[]entities.User, userRequest *middlewares.Claims) ([]entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return []entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if err := u.repository.GetAll(user); err != nil {
+		return []entities.User{}, err
+	}
+
+	return *user, nil
+}

@@ -113,3 +113,16 @@ func (r *Repo) Delete(user *entities.User) error {
 	*user = *userDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) GetAll(user *[]entities.User) error {
+	var userDb []User
+
+	if err := r.DB.Preload("Auth").Find(&userDb).Error; err != nil {
+		return err
+	}
+
+	for _, _user := range userDb {
+		*user = append(*user, *_user.ToUseCase())
+	}
+	return nil
+}
