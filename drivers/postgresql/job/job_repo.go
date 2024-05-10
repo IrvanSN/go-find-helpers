@@ -37,6 +37,45 @@ func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 	return nil
 }
 
+func (r *Repo) FindRelated(job *entities.Job, user *middlewares.Claims) error {
+	jobDb := FromUseCase(job)
+
+	if err := r.DB.Preload("Transactions.Payment").Preload(clause.Associations).Where("user_id = ?", user.ID).First(&jobDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) GetAll(jobs *[]entities.Job, user *middlewares.Claims, status string) error {
+	var jobsDb []Job
+
+	query := r.DB.Preload("Transactions.Payment").Preload(clause.Associations)
+	if user.Role == "CUSTOMER" {
+		query = query.Where("user_id = ?", user.ID)
+	}
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Find(&jobsDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	for _, job := range jobsDb {
+		*jobs = append(*jobs, *job.ToUseCase())
+	}
+	return nil
+}
+
 func (r *Repo) Find(job *entities.Job) error {
 	jobDb := FromUseCase(job)
 
@@ -66,11 +105,28 @@ func (r *Repo) AddHelper(job *entities.Job) error {
 	return nil
 }
 
-func (r *Repo) Update(job *entities.Job) error {
+func (r *Repo) Update(job *entities.Job, user *middlewares.Claims) error {
 	jobDb := FromUseCase(job)
 
-	if err := r.DB.Save(&jobDb).Error; err != nil {
-		return constant.ErrInsertDatabase
+	if err := r.DB.Model(&jobDb).Where("id = ? AND user_id = ?", job.ID, user.ID).Updates(&jobDb).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+	}
+
+	*job = *jobDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Delete(job *entities.Job, user *middlewares.Claims) error {
+	jobDb := FromUseCase(job)
+
+	db := r.DB.Where("id = ? AND user_id = ?", job.ID, user.ID).Delete(&jobDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
+		return err
 	}
 
 	*job = *jobDb.ToUseCase()
@@ -116,12 +172,23 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 		}
 	}()
 
+	// if unfilled helper slot refund to the CUSTOMER balance
+	unfilledHelperSlot := int(jobDb.HelperRequired) - (len(jobDb.Transactions) - 1)
+	customerUser := user.User{ID: jobDb.UserID}
+	if err := tx.First(&customerUser).Error; err != nil {
+		tx.Rollback()
+	}
+	customerUser.CurrentBalance += jobDb.RewardEarned * float64(unfilledHelperSlot)
+	if err := tx.Save(&customerUser).Error; err != nil {
+		tx.Rollback()
+	}
+
 	for i, _transaction := range job.Transactions {
 		if _transaction.Type == "MONEY_IN" {
 			job.Transactions[i].Payment.Status = "SUCCESS"
 
-			newUser := user.User{ID: _transaction.UserID}
-			if err := tx.First(&newUser).Error; err != nil {
+			helperUser := user.User{ID: _transaction.UserID}
+			if err := tx.First(&helperUser).Error; err != nil {
 				tx.Rollback()
 			}
 
@@ -129,12 +196,12 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 				tx.Rollback()
 			}
 
-			newUser.CurrentBalance += _transaction.Total
-			if err := tx.Save(&newUser).Error; err != nil {
+			helperUser.CurrentBalance += _transaction.Total
+			if err := tx.Save(&helperUser).Error; err != nil {
 				tx.Rollback()
 			}
 
-			if err := tx.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", "CLOSED").Error; err != nil {
+			if err := tx.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", "DONE").Error; err != nil {
 				tx.Rollback()
 			}
 		}

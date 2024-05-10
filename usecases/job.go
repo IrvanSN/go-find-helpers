@@ -76,8 +76,12 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 		return entities.Job{}, err
 	}
 
-	if job.Status != "OPEN" {
-		return entities.Job{}, constant.ErrJobNotOpened
+	if job.Status == "ON_PROGRESS" || job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
 	}
 
 	helperAlreadyTakeTheJob := false
@@ -97,7 +101,7 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	}
 
 	if (int(job.HelperRequired) + 1) == (len(job.Transactions) + 1) {
-		job.Status = "CLOSED"
+		job.Status = "ON_PROGRESS"
 		if err := j.repository.UpdateStatus(job); err != nil {
 			return entities.Job{}, constant.ErrFailedUpdate
 		}
@@ -127,6 +131,8 @@ func (j *JobUseCase) Take(job *entities.Job, user *middlewares.Claims) (entities
 	if err := j.repository.AddHelper(&newJob); err != nil {
 		return entities.Job{}, err
 	}
+
+	job.Transactions = append(job.Transactions, transaction)
 
 	return *job, nil
 }
@@ -167,13 +173,103 @@ func (j *JobUseCase) MarkAsDone(job *entities.Job, user *middlewares.Claims) (en
 		return entities.Job{}, constant.ErrEmptyInput
 	}
 
-	if err := j.repository.Find(job); err != nil {
+	if err := j.repository.FindRelated(job, user); err != nil {
 		return entities.Job{}, err
+	}
+
+	if job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
+	}
+
+	if job.Status == "OPEN" {
+		return entities.Job{}, constant.ErrJobStillOpened
 	}
 
 	if err := j.repository.MarkAsDone(job); err != nil {
 		return entities.Job{}, err
 	}
 
-	return entities.Job{}, nil
+	if err := j.repository.FindRelated(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}
+
+func (j *JobUseCase) MarkAsOnProgress(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if job.ID == uuid.Nil {
+		return entities.Job{}, constant.ErrEmptyInput
+	}
+
+	if err := j.repository.FindRelated(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	if job.Status == "CLOSED" {
+		return entities.Job{}, constant.ErrJobAlreadyClosed
+	}
+
+	if job.Status == "DONE" {
+		return entities.Job{}, constant.ErrJobAlreadyDone
+	}
+
+	if job.Status == "ON_PROGRESS" {
+		return entities.Job{}, constant.ErrJobAlreadyOnProgress
+	}
+
+	job.Status = "ON_PROGRESS"
+
+	if err := j.repository.UpdateStatus(job); err != nil {
+		return entities.Job{}, constant.ErrFailedUpdate
+	}
+
+	if err := j.repository.FindRelated(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}
+
+func (j *JobUseCase) GetAll(job *[]entities.Job, user *middlewares.Claims, status string) ([]entities.Job, error) {
+	if err := j.repository.GetAll(job, user, status); err != nil {
+		return []entities.Job{}, err
+	}
+
+	return *job, nil
+}
+
+func (j *JobUseCase) Update(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if err := j.repository.Update(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	if err := j.repository.FindRelated(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
+}
+
+func (j *JobUseCase) Delete(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if user.Role != "CUSTOMER" {
+		return entities.Job{}, constant.ErrNotAuthorized
+	}
+
+	if err := j.repository.Delete(job, user); err != nil {
+		return entities.Job{}, err
+	}
+
+	return *job, nil
 }
