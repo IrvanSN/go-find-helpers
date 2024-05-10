@@ -86,15 +86,3 @@ func (u *UserUseCase) GetAllAddresses(user *entities.User) (entities.User, error
 
 	return *user, nil
 }
-
-func (u *UserUseCase) Find(user *entities.User) (entities.User, error) {
-	if user.ID == uuid.Nil {
-		return entities.User{}, constant.ErrEmptyInput
-	}
-
-	if err := u.repository.Find(user); err != nil {
-		return entities.User{}, err
-	}
-
-	return *user, nil
-}

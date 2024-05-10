@@ -17,7 +17,7 @@ func NewUserRepo(db *gorm.DB) *Repo {
 }
 
 func (r *Repo) SignUp(user *entities.User) error {
-	userDb := AuthFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Create(&userDb).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
@@ -26,12 +26,12 @@ func (r *Repo) SignUp(user *entities.User) error {
 		return err
 	}
 
-	user = userDb.AuthToUseCase()
+	user = userDb.ToUseCase()
 	return nil
 }
 
 func (r *Repo) SignIn(user *entities.User) error {
-	userDb := AuthFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Joins("Auth").First(&userDb, "\"Auth\".email = ? AND users.role = ?", userDb.Auth.Email, userDb.Role).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -39,23 +39,19 @@ func (r *Repo) SignIn(user *entities.User) error {
 		}
 	}
 
-	*user = *userDb.AuthToUseCase()
-	return nil
-}
-
-func (r *Repo) Find(user *entities.User) error {
+	*user = *userDb.ToUseCase()
 	return nil
 }
 
 func (r *Repo) AddAddress(user *entities.User) error {
-	userDb := AddressFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Model(&userDb).Association("Addresses").Append(&userDb); err != nil {
 		fmt.Println("err", err)
 		return constant.ErrInsertDatabase
 	}
 
-	*user = *userDb.AddressToUseCase()
+	*user = *userDb.ToUseCase()
 	return nil
 }
 

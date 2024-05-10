@@ -48,7 +48,7 @@ func (uc *UserController) SignUp(c echo.Context) error {
 	}
 
 	userResponse := response.AuthResponseFromUseCase(&user, token)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success sign-up!", userResponse))
 }
 
 func (uc *UserController) SignIn(c echo.Context) error {
@@ -81,7 +81,7 @@ func (uc *UserController) SignIn(c echo.Context) error {
 	}
 
 	userResponse := response.AuthResponseFromUseCase(&user, token)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success Register", userResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success sign-in!", userResponse))
 }
 
 func (uc *UserController) AddAddress(c echo.Context) error {

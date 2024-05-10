@@ -58,43 +58,6 @@ func FromUseCase(user *entities.User) *User {
 	}
 }
 
-func AuthFromUseCase(user *entities.User) *User {
-	return &User{
-		ID:             user.ID,
-		FirstName:      user.FirstName,
-		LastName:       user.LastName,
-		PhoneNumber:    user.PhoneNumber,
-		CurrentBalance: user.CurrentBalance,
-		CurrentRating:  user.CurrentRating,
-		Role:           user.Role,
-		Auth: auth.Auth{
-			ID:           user.Auth.ID,
-			Email:        user.Auth.Email,
-			PasswordHash: user.Auth.PasswordHash,
-		},
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
-}
-
-func AddressFromUseCase(user *entities.User) *User {
-	newUser := &User{
-		ID: user.ID,
-	}
-	newAddress := address.Address{
-		ID:        user.Addresses[0].ID,
-		Address:   user.Addresses[0].Address,
-		City:      user.Addresses[0].City,
-		State:     user.Addresses[0].State,
-		ZipCode:   user.Addresses[0].ZipCode,
-		Country:   user.Addresses[0].Country,
-		Longitude: user.Addresses[0].Longitude,
-		Latitude:  user.Addresses[0].Latitude,
-	}
-	newUser.Addresses = append(newUser.Addresses, newAddress)
-	return newUser
-}
-
 func (u *User) ToUseCase() *entities.User {
 	addresses := make([]entities.Address, len(u.Addresses))
 	for i, _address := range u.Addresses {
@@ -119,21 +82,6 @@ func (u *User) ToUseCase() *entities.User {
 		CurrentRating:  u.CurrentRating,
 		CurrentBalance: u.CurrentBalance,
 		Role:           u.Role,
-		CreatedAt:      u.CreatedAt,
-		UpdatedAt:      u.UpdatedAt,
-		Addresses:      addresses,
-	}
-}
-
-func (u *User) AuthToUseCase() *entities.User {
-	return &entities.User{
-		ID:             u.ID,
-		FirstName:      u.FirstName,
-		LastName:       u.LastName,
-		PhoneNumber:    u.PhoneNumber,
-		CurrentBalance: u.CurrentBalance,
-		CurrentRating:  u.CurrentRating,
-		Role:           u.Role,
 		Auth: entities.Auth{
 			ID:           u.Auth.ID,
 			Email:        u.Auth.Email,
@@ -141,23 +89,6 @@ func (u *User) AuthToUseCase() *entities.User {
 		},
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
+		Addresses: addresses,
 	}
-}
-
-func (u *User) AddressToUseCase() *entities.User {
-	newUser := &entities.User{
-		ID: u.ID,
-	}
-	newAddress := entities.Address{
-		ID:        u.Addresses[0].ID,
-		Address:   u.Addresses[0].Address,
-		City:      u.Addresses[0].City,
-		State:     u.Addresses[0].State,
-		ZipCode:   u.Addresses[0].ZipCode,
-		Country:   u.Addresses[0].Country,
-		Longitude: u.Addresses[0].Longitude,
-		Latitude:  u.Addresses[0].Latitude,
-	}
-	newUser.Addresses = append(newUser.Addresses, newAddress)
-	return newUser
 }
