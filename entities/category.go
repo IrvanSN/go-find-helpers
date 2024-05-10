@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/middlewares"
+)
 
 type Category struct {
 	ID   uuid.UUID
@@ -9,8 +12,14 @@ type Category struct {
 
 type CategoryRepositoryInterface interface {
 	Create(category *Category) error
+	Update(category *Category) error
+	Delete(category *Category) error
+	GetAll(categories *[]Category) error
 }
 
 type CategoryUseCaseInterface interface {
-	Create(category *Category) (Category, error)
+	Create(category *Category, user *middlewares.Claims) (Category, error)
+	Update(category *Category, user *middlewares.Claims) (Category, error)
+	Delete(category *Category, user *middlewares.Claims) (Category, error)
+	GetAll(categories *[]Category) ([]Category, error)
 }
