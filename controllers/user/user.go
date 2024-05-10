@@ -232,7 +232,7 @@ func (uc *UserController) GetAllTransactions(c echo.Context) error {
 	}
 
 	getAllTransactionsResponse := response.GetAllTransactions(&user)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", getAllTransactionsResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully get all transaction!", getAllTransactionsResponse))
 }
 
 func NewUserController(userUseCase entities.UserUseCaseInterface) *UserController {
