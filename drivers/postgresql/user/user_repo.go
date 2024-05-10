@@ -6,6 +6,7 @@ import (
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repo struct {
@@ -17,7 +18,7 @@ func NewUserRepo(db *gorm.DB) *Repo {
 }
 
 func (r *Repo) SignUp(user *entities.User) error {
-	userDb := AuthFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Create(&userDb).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
@@ -26,12 +27,12 @@ func (r *Repo) SignUp(user *entities.User) error {
 		return err
 	}
 
-	user = userDb.AuthToUseCase()
+	user = userDb.ToUseCase()
 	return nil
 }
 
 func (r *Repo) SignIn(user *entities.User) error {
-	userDb := AuthFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Joins("Auth").First(&userDb, "\"Auth\".email = ? AND users.role = ?", userDb.Auth.Email, userDb.Role).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -39,23 +40,19 @@ func (r *Repo) SignIn(user *entities.User) error {
 		}
 	}
 
-	*user = *userDb.AuthToUseCase()
-	return nil
-}
-
-func (r *Repo) Find(user *entities.User) error {
+	*user = *userDb.ToUseCase()
 	return nil
 }
 
 func (r *Repo) AddAddress(user *entities.User) error {
-	userDb := AddressFromUseCase(user)
+	userDb := FromUseCase(user)
 
 	if err := r.DB.Model(&userDb).Association("Addresses").Append(&userDb); err != nil {
 		fmt.Println("err", err)
 		return constant.ErrInsertDatabase
 	}
 
-	*user = *userDb.AddressToUseCase()
+	*user = *userDb.ToUseCase()
 	return nil
 }
 
@@ -66,6 +63,74 @@ func (r *Repo) GetAllAddresses(user *entities.User) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return constant.ErrNotFound
 		}
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Find(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	if err := r.DB.Omit("DeletedAt").Preload(clause.Associations).First(&userDb, userDb.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return constant.ErrNotFound
+		}
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Update(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	db := r.DB.Where("id = ?", userDb.ID).Updates(&userDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) Delete(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	db := r.DB.Where("id = ?", userDb.ID).Delete(&userDb)
+	if db.RowsAffected < 1 {
+		return constant.ErrNotFound
+	}
+	if err := db.Error; err != nil {
+		return err
+	}
+
+	*user = *userDb.ToUseCase()
+	return nil
+}
+
+func (r *Repo) GetAll(users *[]entities.User) error {
+	var userDb []User
+
+	if err := r.DB.Preload("Auth").Find(&userDb).Error; err != nil {
+		return err
+	}
+
+	for _, _user := range userDb {
+		*users = append(*users, *_user.ToUseCase())
+	}
+	return nil
+}
+
+func (r *Repo) GetAllTransactions(user *entities.User) error {
+	userDb := FromUseCase(user)
+
+	if err := r.DB.Omit("DeletedAt").Preload("Transactions.Payment").Preload(clause.Associations).First(&userDb).Error; err != nil {
 		return err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/entities"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -93,6 +94,62 @@ func (u *UserUseCase) Find(user *entities.User) (entities.User, error) {
 	}
 
 	if err := u.repository.Find(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) Update(user *entities.User, userRequest *middlewares.Claims) (entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if user.ID == uuid.Nil {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	if err := u.repository.Update(user); err != nil {
+		return entities.User{}, err
+	}
+
+	if err := u.repository.Find(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) Delete(user *entities.User, userRequest *middlewares.Claims) (entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if user.ID == uuid.Nil {
+		return entities.User{}, constant.ErrEmptyInput
+	}
+
+	if err := u.repository.Delete(user); err != nil {
+		return entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) GetAll(user *[]entities.User, userRequest *middlewares.Claims) ([]entities.User, error) {
+	if userRequest.Role != "ADMIN" {
+		return []entities.User{}, constant.ErrNotAuthorized
+	}
+
+	if err := u.repository.GetAll(user); err != nil {
+		return []entities.User{}, err
+	}
+
+	return *user, nil
+}
+
+func (u *UserUseCase) GetAllTransactions(user *entities.User) (entities.User, error) {
+	if err := u.repository.GetAllTransactions(user); err != nil {
 		return entities.User{}, err
 	}
 

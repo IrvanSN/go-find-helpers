@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/google/uuid"
+	"github.com/irvansn/go-find-helpers/middlewares"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Jobs           []Job
-	Rewards        []Transaction
+	Transactions   []Transaction
 	Ratings        []Rating
 	Addresses      []Address
 }
@@ -25,15 +26,23 @@ type User struct {
 type UserRepositoryInterface interface {
 	SignUp(user *User) error
 	SignIn(user *User) error
-	Find(user *User) error
 	AddAddress(user *User) error
 	GetAllAddresses(user *User) error
+	Find(user *User) error
+	Update(user *User) error
+	Delete(user *User) error
+	GetAll(user *[]User) error
+	GetAllTransactions(user *User) error
 }
 
 type UserUseCaseInterface interface {
 	SignUp(user *User) (User, error)
 	SignIn(user *User) (User, error)
-	Find(user *User) (User, error)
 	AddAddress(user *User, userId uuid.UUID) (User, error)
+	Find(user *User) (User, error)
 	GetAllAddresses(user *User) (User, error)
+	Update(user *User, userRequest *middlewares.Claims) (User, error)
+	Delete(user *User, userRequest *middlewares.Claims) (User, error)
+	GetAll(user *[]User, userRequest *middlewares.Claims) ([]User, error)
+	GetAllTransactions(user *User) (User, error)
 }
