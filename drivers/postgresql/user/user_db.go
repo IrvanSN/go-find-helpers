@@ -24,7 +24,7 @@ type User struct {
 	UpdatedAt      time.Time         `gorm:"autoUpdateTime"`
 	Addresses      []address.Address `gorm:"many2many:user_addresses;"`
 	Transactions   []transaction.Transaction
-	DeletedAt      gorm.DeletedAt
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
 }
 
 func FromUseCase(user *entities.User) *User {

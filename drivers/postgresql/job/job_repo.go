@@ -2,10 +2,12 @@ package job
 
 import (
 	"errors"
+	"fmt"
 	"github.com/irvansn/go-find-helpers/constant"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
 	"github.com/irvansn/go-find-helpers/middlewares"
+	"github.com/irvansn/go-find-helpers/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -21,7 +23,7 @@ func NewJobRepo(db *gorm.DB) *Repo {
 func (r *Repo) Create(job *entities.Job, user *middlewares.Claims) error {
 	jobDb := FromUseCase(job)
 
-	err := jobDb.Transactions[0].Payment.Create(user.Email)
+	err := jobDb.Transactions[0].Payment.Create(job.ID, user.Email)
 	if err != nil {
 		return err
 	}
@@ -51,16 +53,20 @@ func (r *Repo) FindRelated(job *entities.Job, user *middlewares.Claims) error {
 	return nil
 }
 
-func (r *Repo) GetAll(jobs *[]entities.Job, user *middlewares.Claims, status string) error {
+func (r *Repo) GetAll(jobs *[]entities.Job, user *middlewares.Claims, statusFilter string, categoryIdFilter string) error {
 	var jobsDb []Job
 
-	query := r.DB.Preload("Transactions.Payment").Preload(clause.Associations)
+	query := r.DB.Preload(clause.Associations)
 	if user.Role == "CUSTOMER" {
 		query = query.Where("user_id = ?", user.ID)
 	}
 
-	if status != "" {
-		query = query.Where("status = ?", status)
+	if statusFilter != "" {
+		query = query.Where("status = ?", statusFilter)
+	}
+
+	if categoryIdFilter != "" {
+		query = query.Where("category_id = ?", categoryIdFilter)
 	}
 
 	if err := query.Find(&jobsDb).Error; err != nil {
@@ -69,6 +75,8 @@ func (r *Repo) GetAll(jobs *[]entities.Job, user *middlewares.Claims, status str
 		}
 		return err
 	}
+
+	fmt.Println("adw", utils.PrettyPrint(jobsDb))
 
 	for _, job := range jobsDb {
 		*jobs = append(*jobs, *job.ToUseCase())
@@ -153,6 +161,9 @@ func (r *Repo) PaymentCallback(job *entities.Job) error {
 	if err := r.DB.Model(&jobDb.Transactions[0].Payment).Where("id = ?", jobDb.Transactions[0].Payment.ID).Update("status", jobDb.Transactions[0].Payment.Status).Error; err != nil {
 		return constant.ErrFailedUpdate
 	}
+
+	fmt.Println(utils.PrettyPrint(jobDb.ID))
+	fmt.Println(utils.PrettyPrint(jobDb.Status))
 
 	if err := r.DB.Model(&jobDb).Where("id = ?", jobDb.ID).Update("status", jobDb.Status).Error; err != nil {
 		return constant.ErrFailedUpdate

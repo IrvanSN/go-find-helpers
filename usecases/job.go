@@ -238,8 +238,8 @@ func (j *JobUseCase) MarkAsOnProgress(job *entities.Job, user *middlewares.Claim
 	return *job, nil
 }
 
-func (j *JobUseCase) GetAll(job *[]entities.Job, user *middlewares.Claims, status string) ([]entities.Job, error) {
-	if err := j.repository.GetAll(job, user, status); err != nil {
+func (j *JobUseCase) GetAll(job *[]entities.Job, user *middlewares.Claims, statusFilter string, categoryIdFilter string) ([]entities.Job, error) {
+	if err := j.repository.GetAll(job, user, statusFilter, categoryIdFilter); err != nil {
 		return []entities.Job{}, err
 	}
 

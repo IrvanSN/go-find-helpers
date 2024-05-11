@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/payment"
 	"github.com/irvansn/go-find-helpers/entities"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type Transaction struct {
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	Payment   payment.Payment
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func FromUseCase(transaction *entities.Transaction) *Transaction {

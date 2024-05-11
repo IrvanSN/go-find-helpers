@@ -18,7 +18,7 @@ type Address struct {
 	Latitude  string    `gorm:"type:varchar(100);not null"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	gorm.DeletedAt
+	DeletedAt gorm.DeletedAt
 }
 
 func FromUseCase(address *entities.Address) *Address {
