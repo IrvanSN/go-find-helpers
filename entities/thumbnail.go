@@ -7,3 +7,9 @@ type Thumbnail struct {
 	ImageKey    string
 	Description string
 }
+
+type ThumbnailRepositoryInterface interface {
+}
+
+type ThumbnailUseCaseInterface interface {
+}
