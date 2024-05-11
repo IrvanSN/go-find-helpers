@@ -24,7 +24,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
 		if authHeader == "" {
-			err := constant.ErrNotAuthorized
+			err := constant.ErrTokenNotFound
 			return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 		}
 
@@ -32,7 +32,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		token, err := jwt2.ParseWithClaims(tokenString, &Claims{}, func(token *jwt2.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt2.SigningMethodHMAC); !ok {
-				err := constant.ErrInvalidRequest
+				err := constant.ErrTokenNotValid
 				return nil, c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 			}
 
@@ -40,18 +40,18 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 
 		if err != nil {
-			err := constant.ErrNotAuthorized
+			err := constant.ErrTokenNotValid
 			return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 		}
 
 		if !token.Valid {
-			err := constant.ErrNotAuthorized
+			err := constant.ErrTokenNotValid
 			return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 		}
 
 		claims, ok := token.Claims.(*Claims)
 		if !ok {
-			err := constant.ErrNotAuthorized
+			err := constant.ErrTokenNotValid
 			return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
 		}
 

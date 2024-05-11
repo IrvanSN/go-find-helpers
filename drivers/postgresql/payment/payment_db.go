@@ -33,14 +33,14 @@ type xdtInvoicePayload struct {
 	Description string `json:"description"`
 }
 
-func (p *Payment) Create(email string) error {
+func (p *Payment) Create(jobId uuid.UUID, email string) error {
 	url := "https://api.xendit.co/v2/invoices"
 	method := "POST"
 
 	p.ExternalID = p.ID.String()
 
 	var payload xdtInvoicePayload
-	payload.ExternalID = p.ID.String()
+	payload.ExternalID = jobId.String() + ":" + p.ID.String()
 	payload.Amount = p.Amount
 	payload.PayerEmail = email
 	payload.Description = "Find Helpers App Invoice"

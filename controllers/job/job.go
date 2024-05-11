@@ -113,13 +113,14 @@ func (jc *JobController) MarkAsOnProgress(c echo.Context) error {
 func (jc *JobController) GetAllJobs(c echo.Context) error {
 	var jobGetAllRequest []entities.Job
 	statusFilter := c.QueryParam("status")
+	categoryIdFilter := c.QueryParam("category_id")
 
 	userData, ok := c.Get("claims").(*middlewares.Claims)
 	if !ok {
 		return echo.ErrInternalServerError
 	}
 
-	jobs, errUseCase := jc.jobUseCase.GetAll(&jobGetAllRequest, userData, statusFilter)
+	jobs, errUseCase := jc.jobUseCase.GetAll(&jobGetAllRequest, userData, statusFilter, categoryIdFilter)
 	if errUseCase != nil {
 		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
 	}
