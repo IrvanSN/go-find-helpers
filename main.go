@@ -5,6 +5,7 @@ import (
 	addressController "github.com/irvansn/go-find-helpers/controllers/address"
 	categoryController "github.com/irvansn/go-find-helpers/controllers/category"
 	jobController "github.com/irvansn/go-find-helpers/controllers/job"
+	thumbnailController "github.com/irvansn/go-find-helpers/controllers/thumbnail"
 	ratingController "github.com/irvansn/go-find-helpers/controllers/rating"
 	transactionController "github.com/irvansn/go-find-helpers/controllers/transaction"
 	userController "github.com/irvansn/go-find-helpers/controllers/user"
@@ -12,7 +13,10 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/job"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/thumbnail"
+
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/rating"
+
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/routes"
@@ -49,6 +53,10 @@ func main() {
 	transactionUseCase := usecases.NewTransactionUseCase(transactionRepo)
 	newTransactionController := transactionController.NewTransactionController(transactionUseCase)
 
+	thumbnailRepo := thumbnail.NewThumbnailRepo(db)
+	thumbnailUseCase := usecases.NewThumbnailUseCase(thumbnailRepo)
+	newThumbnailController := thumbnailController.NewThumbnailController(thumbnailUseCase)
+
 	ratingRepo := rating.NewRatingRepo(db)
 	ratingUseCase := usecases.NewRatingUseCase(ratingRepo)
 	newRatingController := ratingController.NewRatingController(ratingUseCase)
@@ -68,6 +76,9 @@ func main() {
 	transactionRouteController := routes.TransactionRouteController{
 		TransactionController: newTransactionController,
 	}
+	thumbnailRouteController := routes.ThumbnailRouteController{
+		ThumbnailController: newThumbnailController,
+  }
 	ratingRouteController := routes.RatingRouteController{
 		RatingController: newRatingController,
 	}
@@ -77,6 +88,7 @@ func main() {
 	jobRouteController.InitRoute(e)
 	addressRouteController.InitRoute(e)
 	transactionRouteController.InitRoute(e)
+	thumbnailRouteController.InitRoute(e)
 	ratingRouteController.InitRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
