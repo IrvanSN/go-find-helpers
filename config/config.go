@@ -2,24 +2,15 @@ package config
 
 import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql"
-	"github.com/joho/godotenv"
-	"log"
 	"os"
 )
 
-func LoadEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
-
-func InitConfigMySQL() postgresql.Config {
+func InitConfigPostgresql() postgresql.Config {
 	return postgresql.Config{
-		DBName: os.Getenv("DBName"),
-		DBUser: os.Getenv("DBUser"),
-		DBPass: os.Getenv("DBPass"),
-		DBHost: os.Getenv("DBHost"),
-		DBPort: os.Getenv("DBPort"),
+		DBName: os.Getenv("DB_NAME"),
+		DBUser: os.Getenv("DB_USER"),
+		DBPass: os.Getenv("DB_PASS"),
+		DBHost: os.Getenv("DB_HOST"),
+		DBPort: os.Getenv("DB_PORT"),
 	}
 }

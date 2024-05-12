@@ -5,8 +5,8 @@ import (
 	addressController "github.com/irvansn/go-find-helpers/controllers/address"
 	categoryController "github.com/irvansn/go-find-helpers/controllers/category"
 	jobController "github.com/irvansn/go-find-helpers/controllers/job"
-	thumbnailController "github.com/irvansn/go-find-helpers/controllers/thumbnail"
 	ratingController "github.com/irvansn/go-find-helpers/controllers/rating"
+	thumbnailController "github.com/irvansn/go-find-helpers/controllers/thumbnail"
 	transactionController "github.com/irvansn/go-find-helpers/controllers/transaction"
 	userController "github.com/irvansn/go-find-helpers/controllers/user"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql"
@@ -26,9 +26,8 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
-	config.InitConfigMySQL()
-	db := postgresql.ConnectDB(config.InitConfigMySQL())
+	config.InitConfigPostgresql()
+	db := postgresql.ConnectDB(config.InitConfigPostgresql())
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -78,7 +77,7 @@ func main() {
 	}
 	thumbnailRouteController := routes.ThumbnailRouteController{
 		ThumbnailController: newThumbnailController,
-  }
+	}
 	ratingRouteController := routes.RatingRouteController{
 		RatingController: newRatingController,
 	}

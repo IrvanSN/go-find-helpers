@@ -1,0 +1,61 @@
+name: running test,build image, push registry, deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+#  test:
+#    name: running test
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-go@v5
+#        with:
+#          go-version: "1.21.1"
+#      - name: run test
+#        run: go test -v ./... -cover
+
+  build:
+    name: build image
+    runs-on: ubuntu-latest
+#    needs: test
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: build image
+        run: docker build -t irvansn/go-find-helpers:latest .
+      - name: login registry
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: push image
+        run: docker push irvansn/go-find-helpers:latest
+
+  deploy:
+    name: deploy to vm
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - name: deploy ec2
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          XDT_CALLBACK_VERIFICATION: ${{ secrets.XDT_CALLBACK_VERIFICATION }}
+          XDT_SECRET_API_KEY: ${{ secrets.XDT_SECRET_API_KEY }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: DB_NAME,DB_USER,DB_PASS,DB_HOST,DB_PORT,JWT_SECRET_KEY,R2_ACCESS_KEY,R2_ACCOUNT_ID,R2_BUCKET_NAME,R2_SECRET_KEY,XDT_CALLBACK_VERIFICATION,XDT_SECRET_API_KEY
+          script: DB_HOST="$DB_HOST" DB_NAME="$DB_NAME" DB_PASS="$DB_PASS" DB_PORT="$DB_PORT" DB_USER="$DB_USER" JWT_SECRET_KEY="$JWT_SECRET_KEY" R2_ACCESS_KEY="$R2_ACCESS_KEY" R2_ACCOUNT_ID="$R2_ACCOUNT_ID" R2_BUCKET_NAME="$R2_BUCKET_NAME" R2_SECRET_KEY="$R2_SECRET_KEY" XDT_CALLBACK_VERIFICATION="$XDT_CALLBACK_VERIFICATION" XDT_SECRET_API_KEY="$XDT_SECRET_API_KEY" docker compose up --build -d --no-deps
