@@ -32,7 +32,7 @@ type Job struct {
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 	Transactions   []transaction.Transaction
 	Thumbnails     []thumbnail.Thumbnail
-	gorm.DeletedAt
+	DeletedAt      gorm.DeletedAt
 }
 
 func FromUseCase(job *entities.Job) *Job {

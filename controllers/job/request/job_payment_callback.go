@@ -1,8 +1,10 @@
 package request
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/entities"
+	"strings"
 )
 
 type JobPaymentCallbackRequest struct {
@@ -12,18 +14,22 @@ type JobPaymentCallbackRequest struct {
 }
 
 func (j *JobPaymentCallbackRequest) JobPaymentCallbackToEntities() *entities.Job {
-	externalID, _ := uuid.Parse(j.ExternalID)
+	splitID := strings.Split(j.ExternalID, ":")
+	fmt.Println("splitID", splitID)
+	paymentId, _ := uuid.Parse(splitID[1])
+	JobId, _ := uuid.Parse(splitID[0])
 
 	var transactions []entities.Transaction
 	transactions = append(transactions, entities.Transaction{
 		Payment: entities.Payment{
-			ID:         externalID,
+			ID:         paymentId,
 			ExternalID: j.ID,
 			Status:     j.Status,
 		},
 	})
 
 	return &entities.Job{
+		ID:           JobId,
 		Transactions: transactions,
 	}
 }
