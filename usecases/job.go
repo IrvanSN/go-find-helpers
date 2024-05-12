@@ -273,3 +273,10 @@ func (j *JobUseCase) Delete(job *entities.Job, user *middlewares.Claims) (entiti
 
 	return *job, nil
 }
+func (j *JobUseCase) GetJobDetail(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
+	if err := j.repository.Find(job); err != nil {
+		return entities.Job{}, err
+	}
+	
+	return *job, nil
+}

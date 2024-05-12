@@ -45,4 +45,5 @@ type JobUseCaseInterface interface {
 	GetAll(job *[]Job, user *middlewares.Claims, statusFilter string, categoryIdFilter string) ([]Job, error)
 	Update(job *Job, user *middlewares.Claims) (Job, error)
 	Delete(job *Job, user *middlewares.Claims) (Job, error)
+	GetJobDetail(job *Job, user *middlewares.Claims) (Job, error)
 }
