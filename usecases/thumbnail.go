@@ -9,3 +9,11 @@ type ThumbnailUseCase struct {
 func NewThumbnailUseCase(repository entities.ThumbnailRepositoryInterface) *ThumbnailUseCase {
 	return &ThumbnailUseCase{repository: repository}
 }
+
+func (c *ThumbnailUseCase) GetPreSignedURL(thumbnail *entities.Thumbnail) (entities.Thumbnail, error) {
+	if err := c.repository.GetPreSignedURL(thumbnail); err != nil {
+		return entities.Thumbnail{}, err
+	}
+
+	return *thumbnail, nil
+}
