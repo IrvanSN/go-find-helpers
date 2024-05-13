@@ -21,6 +21,7 @@ type RatingRepositoryInterface interface {
 	Update(rating *Rating) error
 	Delete(rating *Rating) error
 	GetAll(ratings *[]Rating, ratingUserId uuid.UUID) error
+	UpdateUserRating(userId uuid.UUID, ratingAccumulation float32) error
 }
 
 type RatingUseCaseInterface interface {
