@@ -3,6 +3,7 @@ package rating
 import (
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/constant"
+	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
 )
@@ -66,5 +67,15 @@ func (r Repo) GetAll(ratings *[]entities.Rating, ratingUserId uuid.UUID) error {
 	for _, _rating := range ratingDb {
 		*ratings = append(*ratings, *_rating.ToUseCase())
 	}
+
+	return nil
+}
+func (r Repo) UpdateUserRating(userId uuid.UUID, ratingAccumulation float32) error {
+	var userDb user.User
+
+	if err := r.DB.Model(&userDb).Where("id = ?", userId).Update("current_rating", ratingAccumulation).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
