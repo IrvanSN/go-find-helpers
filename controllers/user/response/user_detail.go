@@ -11,20 +11,24 @@ type AuthResponse struct {
 }
 
 type UserDetailResponse struct {
-	ID          uuid.UUID    `json:"id"`
-	FirstName   string       `json:"first_name"`
-	LastName    string       `json:"last_name"`
-	PhoneNumber string       `json:"phone_number"`
-	Auth        AuthResponse `json:"auth"`
-	Role        string       `json:"roles"`
+	ID             uuid.UUID    `json:"id"`
+	FirstName      string       `json:"first_name"`
+	LastName       string       `json:"last_name"`
+	PhoneNumber    string       `json:"phone_number"`
+	CurrentRating  float32      `json:"current_rating"`
+	CurrentBalance float64      `json:"current_balance"`
+	Auth           AuthResponse `json:"auth"`
+	Role           string       `json:"roles"`
 }
 
 func UserDetailResponseFromUseCase(u *entities.User) *UserDetailResponse {
 	return &UserDetailResponse{
-		ID:          u.ID,
-		FirstName:   u.FirstName,
-		LastName:    u.LastName,
-		PhoneNumber: u.PhoneNumber,
+		ID:             u.ID,
+		FirstName:      u.FirstName,
+		LastName:       u.LastName,
+		PhoneNumber:    u.PhoneNumber,
+		CurrentRating:  u.CurrentRating,
+		CurrentBalance: u.CurrentBalance,
 		Auth: AuthResponse{
 			ID:    u.ID,
 			Email: u.Auth.Email,
