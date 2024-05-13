@@ -45,7 +45,7 @@ func (rc *RatingController) GetAll(c echo.Context) error {
 	}
 
 	ratingResponse := response.SliceFromUseCase(&ratings)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Rating deleted!", ratingResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully retrieve all Ratings data!", ratingResponse))
 }
 
 func (rc *RatingController) Update(c echo.Context) error {

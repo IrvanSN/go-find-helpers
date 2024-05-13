@@ -33,7 +33,7 @@ func (tc *TransactionController) GetAllTransactions(c echo.Context) error {
 	}
 
 	getAllTransactionsResponse := response.GetAllTransactions(&transactions)
-	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully delete user!", getAllTransactionsResponse))
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Successfully retrieve all Transactions data!", getAllTransactionsResponse))
 }
 
 func NewTransactionController(transactionUseCase entities.TransactionUseCaseInterface) *TransactionController {
