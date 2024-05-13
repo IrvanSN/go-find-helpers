@@ -1,4 +1,4 @@
-name: running test,build image, push registry, deploy
+name: go-find-helpers production deployment
 on:
   push:
     branches: [main]
