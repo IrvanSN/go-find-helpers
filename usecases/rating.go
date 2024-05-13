@@ -26,6 +26,22 @@ func (r *RatingUseCase) Create(rating *entities.Rating) (entities.Rating, error)
 		return entities.Rating{}, err
 	}
 
+	var userRatings []entities.Rating
+	if err := r.repository.GetAll(&userRatings, rating.ToUserID); err != nil {
+		return entities.Rating{}, err
+	}
+
+	var totalRatingEarned = 0
+	var ratingDataLength = len(userRatings)
+
+	for _, userRating := range userRatings {
+		totalRatingEarned += userRating.Star
+	}
+
+	if err := r.repository.UpdateUserRating(rating.ToUserID, float32(totalRatingEarned)/float32(ratingDataLength)); err != nil {
+		return entities.Rating{}, err
+	}
+
 	return *rating, nil
 }
 
