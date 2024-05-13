@@ -10,10 +10,12 @@ func SliceFromUseCase(users *[]entities.User) *UserGetAllResponse {
 	allUsers := make([]UserDetailResponse, len(*users))
 	for i, _user := range *users {
 		allUsers[i] = UserDetailResponse{
-			ID:          _user.ID,
-			FirstName:   _user.FirstName,
-			LastName:    _user.LastName,
-			PhoneNumber: _user.PhoneNumber,
+			ID:             _user.ID,
+			FirstName:      _user.FirstName,
+			LastName:       _user.LastName,
+			CurrentRating:  _user.CurrentRating,
+			CurrentBalance: _user.CurrentBalance,
+			PhoneNumber:    _user.PhoneNumber,
 			Auth: AuthResponse{
 				ID:    _user.Auth.ID,
 				Email: _user.Auth.Email,

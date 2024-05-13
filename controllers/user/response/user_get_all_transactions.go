@@ -15,6 +15,7 @@ type TransactionResponse struct {
 	TransactionId uuid.UUID       `json:"transaction_id"`
 	Type          string          `json:"type"`
 	UserID        uuid.UUID       `json:"user_id"`
+	JobID         uuid.UUID       `json:"job_id"`
 	SubTotal      float64         `json:"sub_total"`
 	Tax           float64         `json:"tax"`
 	Total         float64         `json:"total"`
@@ -32,6 +33,7 @@ func GetAllTransactions(user *entities.User) UserGetAllTransactionsResponse {
 			TransactionId: transaction.ID,
 			Type:          transaction.Type,
 			UserID:        transaction.UserID,
+			JobID:         transaction.JobID,
 			SubTotal:      transaction.SubTotal,
 			Tax:           transaction.Tax,
 			Total:         transaction.Total,
