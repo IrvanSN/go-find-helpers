@@ -12,6 +12,7 @@ services:
       - db:/var/lib/postgresql/data
   app:
     image: irvansn/go-find-helpers:latest
+    pull_policy: always
     restart: always
     depends_on:
       - db
