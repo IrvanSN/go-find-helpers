@@ -26,4 +26,6 @@ func (r *JobRouteController) InitRoute(e *echo.Echo) {
 	j.PUT("/:id", r.JobController.Update)
 	j.DELETE("/:id", r.JobController.Delete)
 	j.GET("/:id", r.JobController.GetJobDetail)
+
+	j.POST("/customer-service", r.JobController.JobCustomerService)
 }

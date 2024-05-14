@@ -225,3 +225,15 @@ func (r *Repo) MarkAsDone(job *entities.Job) error {
 	*job = *jobDb.ToUseCase()
 	return nil
 }
+
+func (r *Repo) CustomerService(cs *entities.JobCustomerService, user *middlewares.Claims) error {
+	csDb := CustomerServiceFromUseCase(cs)
+
+	csResponse, err := csDb.Talk()
+	if err != nil {
+		return err
+	}
+
+	*cs = *csResponse
+	return nil
+}

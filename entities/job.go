@@ -23,6 +23,11 @@ type Job struct {
 	Thumbnails     []Thumbnail
 }
 
+type JobCustomerService struct {
+	Question string
+	Answer   string
+}
+
 type JobRepositoryInterface interface {
 	Create(Job *Job, user *middlewares.Claims) error
 	FindRelated(job *Job, user *middlewares.Claims) error
@@ -34,6 +39,7 @@ type JobRepositoryInterface interface {
 	GetAll(job *[]Job, user *middlewares.Claims, statusFilter string, categoryIdFilter string) error
 	Update(job *Job, user *middlewares.Claims) error
 	Delete(job *Job, user *middlewares.Claims) error
+	CustomerService(cs *JobCustomerService, user *middlewares.Claims) error
 }
 
 type JobUseCaseInterface interface {
@@ -46,4 +52,5 @@ type JobUseCaseInterface interface {
 	Update(job *Job, user *middlewares.Claims) (Job, error)
 	Delete(job *Job, user *middlewares.Claims) (Job, error)
 	GetJobDetail(job *Job, user *middlewares.Claims) (Job, error)
+	CustomerService(cs *JobCustomerService, user *middlewares.Claims) (JobCustomerService, error)
 }

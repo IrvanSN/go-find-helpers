@@ -201,6 +201,26 @@ func (jc *JobController) GetJobDetail(c echo.Context) error {
 	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get Job data!", jobDetailResponse))
 }
 
+func (jc *JobController) JobCustomerService(c echo.Context) error {
+	var jobCustomerService request.JobCustomerServiceRequest
+	if err := c.Bind(&jobCustomerService); err != nil {
+		return c.JSON(utils.ConvertResponseCode(err), base.NewErrorResponse(err.Error()))
+	}
+
+	userData, ok := c.Get("claims").(*middlewares.Claims)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	customerService, errUseCase := jc.jobUseCase.CustomerService(jobCustomerService.JobIdToEntities(), userData)
+	if errUseCase != nil {
+		return c.JSON(utils.ConvertResponseCode(errUseCase), base.NewErrorResponse(errUseCase.Error()))
+	}
+
+	jobCustomerServiceResponse := response.JobCustomerServiceFromUseCase(&customerService)
+	return c.JSON(http.StatusOK, base.NewSuccessResponse("Success get Job data!", jobCustomerServiceResponse))
+}
+
 func NewJobController(jobUseCase entities.JobUseCaseInterface) *JobController {
 	return &JobController{jobUseCase: jobUseCase}
 }
