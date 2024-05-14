@@ -1,6 +1,9 @@
 package job
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/address"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/category"
@@ -10,8 +13,38 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
 	"gorm.io/gorm"
+	"net/http"
+	"os"
 	"time"
 )
+
+type MessageOpenAI struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type APIChatOpenAIRequestBody struct {
+	Model            string          `json:"model"`
+	Temperature      int             `json:"temperature"`
+	MaxTokens        int32           `json:"max_tokens"`
+	TopP             int             `json:"top_p"`
+	FrequencyPenalty int             `json:"frequency_penalty"`
+	PresencePenalty  int             `json:"presence_penalty"`
+	Messages         []MessageOpenAI `json:"messages"`
+}
+
+type ChoiceOpenAI struct {
+	Message MessageOpenAI `json:"message"`
+}
+
+type APIChatOpenAIResponseBody struct {
+	Choices []ChoiceOpenAI `json:"choices"`
+}
+
+type CustomerService struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
 
 type Job struct {
 	ID             uuid.UUID `gorm:"type:varchar(100);"`
@@ -161,4 +194,58 @@ func (j *Job) ToUseCase() *entities.Job {
 		Transactions: jobTransactions,
 		Thumbnails:   jobThumbnails,
 	}
+}
+
+func CustomerServiceFromUseCase(cs *entities.JobCustomerService) *CustomerService {
+	return &CustomerService{
+		Question: cs.Question,
+		Answer:   cs.Answer,
+	}
+}
+
+func (cs *CustomerService) Talk() (*entities.JobCustomerService, error) {
+	var client = &http.Client{}
+	var requestBody = APIChatOpenAIRequestBody{
+		Model:            "gpt-3.5-turbo",
+		Temperature:      1,
+		MaxTokens:        255,
+		TopP:             1,
+		FrequencyPenalty: 0,
+		PresencePenalty:  0,
+		Messages: []MessageOpenAI{
+			{Role: "system", Content: "You're a product manager who knows all the product, and you're customer service for that product. The product briefs is platform connects users with helpers for moving, delivering, shopping, or recycling tasks. A platform that connects individuals who need help with daily tasks (customers) with freelancers (helpers). Platform name is Find Helpers."},
+			{Role: "user", Content: "The question is" + cs.Question},
+		},
+	}
+
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(requestBody)
+	if err != nil {
+		return &entities.JobCustomerService{}, nil
+	}
+	request, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", &buf)
+	if err != nil {
+		return &entities.JobCustomerService{}, nil
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Authorization", "Bearer "+os.Getenv("OPEN_API_KEY"))
+
+	response, err := client.Do(request)
+	if err != nil {
+		return &entities.JobCustomerService{}, nil
+	}
+	defer response.Body.Close()
+
+	responseJSON := APIChatOpenAIResponseBody{}
+	err = json.NewDecoder(response.Body).Decode(&responseJSON)
+	if err != nil {
+		fmt.Println(err)
+		return &entities.JobCustomerService{}, nil
+	}
+
+	return &entities.JobCustomerService{
+		Question: cs.Question,
+		Answer:   responseJSON.Choices[0].Message.Content,
+	}, nil
 }
