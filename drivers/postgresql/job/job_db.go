@@ -12,6 +12,7 @@ import (
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/transaction"
 	"github.com/irvansn/go-find-helpers/drivers/postgresql/user"
 	"github.com/irvansn/go-find-helpers/entities"
+	"github.com/irvansn/go-find-helpers/utils"
 	"gorm.io/gorm"
 	"net/http"
 	"os"
@@ -221,11 +222,13 @@ func (cs *CustomerService) Talk() (*entities.JobCustomerService, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(requestBody)
 	if err != nil {
-		return &entities.JobCustomerService{}, nil
+		fmt.Println("json.NewEncoder(&buf).Encode(requestBody)", err)
+		return &entities.JobCustomerService{}, err
 	}
 	request, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", &buf)
 	if err != nil {
-		return &entities.JobCustomerService{}, nil
+		fmt.Println("http.NewRequest", err)
+		return &entities.JobCustomerService{}, err
 	}
 
 	request.Header.Add("Content-Type", "application/json")
@@ -233,19 +236,22 @@ func (cs *CustomerService) Talk() (*entities.JobCustomerService, error) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		return &entities.JobCustomerService{}, nil
+		fmt.Println("client.Do", err)
+		return &entities.JobCustomerService{}, err
 	}
 	defer response.Body.Close()
 
 	responseJSON := APIChatOpenAIResponseBody{}
 	err = json.NewDecoder(response.Body).Decode(&responseJSON)
 	if err != nil {
-		fmt.Println(err)
-		return &entities.JobCustomerService{}, nil
+		fmt.Println("json.NewDecoder(response.Body).Decode(&responseJSON)", err)
+		return &entities.JobCustomerService{}, err
 	}
+
+	fmt.Println("responseJSON", utils.PrettyPrint(responseJSON))
 
 	return &entities.JobCustomerService{
 		Question: cs.Question,
 		Answer:   responseJSON.Choices[0].Message.Content,
-	}, nil
+	}, err
 }
