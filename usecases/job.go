@@ -273,10 +273,23 @@ func (j *JobUseCase) Delete(job *entities.Job, user *middlewares.Claims) (entiti
 
 	return *job, nil
 }
+
 func (j *JobUseCase) GetJobDetail(job *entities.Job, user *middlewares.Claims) (entities.Job, error) {
 	if err := j.repository.Find(job); err != nil {
 		return entities.Job{}, err
 	}
-	
+
 	return *job, nil
+}
+
+func (j *JobUseCase) CustomerService(cs *entities.JobCustomerService, user *middlewares.Claims) (entities.JobCustomerService, error) {
+	if cs.Question == "" {
+		return entities.JobCustomerService{}, constant.ErrEmptyInput
+	}
+
+	if err := j.repository.CustomerService(cs, user); err != nil {
+		return entities.JobCustomerService{}, err
+	}
+
+	return *cs, nil
 }
